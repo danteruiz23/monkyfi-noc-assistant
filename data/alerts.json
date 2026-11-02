@@ -1,0 +1,770 @@
+[
+  {
+    "event_id": "evt-0001",
+    "timestamp": "2026-11-04T02:00:30Z",
+    "source": "noc-simulator",
+    "alert_type": "bgp_flap",
+    "severity": "critical",
+    "device": "MIA-EDGE-02",
+    "interface": "Te0/0/0/1",
+    "metric": {
+      "name": "bgp_neighbor_state",
+      "value": "down"
+    },
+    "message": "BGP neighbor 198.51.100.2 (AS 64512) state changed to down on MIA-EDGE-02 (flap 1/6)",
+    "syslog": "<134>1 2026-11-04T02:00:30Z MIA-EDGE-02 BGP-5-ADJCHANGE: Te0/0/0/1 bgp_neighbor_state=down BGP neighbor 198.51.100.2 (AS 64512) state changed to down on MIA-EDGE-02 (flap 1/6)"
+  },
+  {
+    "event_id": "evt-0002",
+    "timestamp": "2026-11-04T02:01:05Z",
+    "source": "noc-simulator",
+    "alert_type": "bgp_flap",
+    "severity": "major",
+    "device": "MIA-EDGE-02",
+    "interface": "Te0/0/0/1",
+    "metric": {
+      "name": "bgp_neighbor_state",
+      "value": "up"
+    },
+    "message": "BGP neighbor 198.51.100.2 (AS 64512) state changed to up on MIA-EDGE-02 (flap 2/6)",
+    "syslog": "<134>1 2026-11-04T02:01:05Z MIA-EDGE-02 BGP-5-ADJCHANGE: Te0/0/0/1 bgp_neighbor_state=up BGP neighbor 198.51.100.2 (AS 64512) state changed to up on MIA-EDGE-02 (flap 2/6)"
+  },
+  {
+    "event_id": "evt-0003",
+    "timestamp": "2026-11-04T02:01:40Z",
+    "source": "noc-simulator",
+    "alert_type": "bgp_flap",
+    "severity": "critical",
+    "device": "MIA-EDGE-02",
+    "interface": "Te0/0/0/1",
+    "metric": {
+      "name": "bgp_neighbor_state",
+      "value": "down"
+    },
+    "message": "BGP neighbor 198.51.100.2 (AS 64512) state changed to down on MIA-EDGE-02 (flap 3/6)",
+    "syslog": "<134>1 2026-11-04T02:01:40Z MIA-EDGE-02 BGP-5-ADJCHANGE: Te0/0/0/1 bgp_neighbor_state=down BGP neighbor 198.51.100.2 (AS 64512) state changed to down on MIA-EDGE-02 (flap 3/6)"
+  },
+  {
+    "event_id": "evt-0004",
+    "timestamp": "2026-11-04T02:02:15Z",
+    "source": "noc-simulator",
+    "alert_type": "bgp_flap",
+    "severity": "major",
+    "device": "MIA-EDGE-02",
+    "interface": "Te0/0/0/1",
+    "metric": {
+      "name": "bgp_neighbor_state",
+      "value": "up"
+    },
+    "message": "BGP neighbor 198.51.100.2 (AS 64512) state changed to up on MIA-EDGE-02 (flap 4/6)",
+    "syslog": "<134>1 2026-11-04T02:02:15Z MIA-EDGE-02 BGP-5-ADJCHANGE: Te0/0/0/1 bgp_neighbor_state=up BGP neighbor 198.51.100.2 (AS 64512) state changed to up on MIA-EDGE-02 (flap 4/6)"
+  },
+  {
+    "event_id": "evt-0005",
+    "timestamp": "2026-11-04T02:02:30Z",
+    "source": "noc-simulator",
+    "alert_type": "link_saturation",
+    "severity": "major",
+    "device": "MIA-EDGE-02",
+    "interface": "Te0/0/0/0",
+    "metric": {
+      "name": "link_utilization_pct",
+      "value": 81
+    },
+    "message": "Uplink Te0/0/0/0 utilization at 81% (threshold 80%) on MIA-EDGE-02",
+    "syslog": "<134>1 2026-11-04T02:02:30Z MIA-EDGE-02 LINK-4-UTILIZATION: Te0/0/0/0 link_utilization_pct=81 Uplink Te0/0/0/0 utilization at 81% (threshold 80%) on MIA-EDGE-02"
+  },
+  {
+    "event_id": "evt-0006",
+    "timestamp": "2026-11-04T02:02:50Z",
+    "source": "noc-simulator",
+    "alert_type": "bgp_flap",
+    "severity": "critical",
+    "device": "MIA-EDGE-02",
+    "interface": "Te0/0/0/1",
+    "metric": {
+      "name": "bgp_neighbor_state",
+      "value": "down"
+    },
+    "message": "BGP neighbor 198.51.100.2 (AS 64512) state changed to down on MIA-EDGE-02 (flap 5/6)",
+    "syslog": "<134>1 2026-11-04T02:02:50Z MIA-EDGE-02 BGP-5-ADJCHANGE: Te0/0/0/1 bgp_neighbor_state=down BGP neighbor 198.51.100.2 (AS 64512) state changed to down on MIA-EDGE-02 (flap 5/6)"
+  },
+  {
+    "event_id": "evt-0007",
+    "timestamp": "2026-11-04T02:03:10Z",
+    "source": "noc-simulator",
+    "alert_type": "link_saturation",
+    "severity": "major",
+    "device": "MIA-EDGE-02",
+    "interface": "Te0/0/0/0",
+    "metric": {
+      "name": "link_utilization_pct",
+      "value": 85
+    },
+    "message": "Uplink Te0/0/0/0 utilization at 85% (threshold 80%) on MIA-EDGE-02",
+    "syslog": "<134>1 2026-11-04T02:03:10Z MIA-EDGE-02 LINK-4-UTILIZATION: Te0/0/0/0 link_utilization_pct=85 Uplink Te0/0/0/0 utilization at 85% (threshold 80%) on MIA-EDGE-02"
+  },
+  {
+    "event_id": "evt-0008",
+    "timestamp": "2026-11-04T02:03:20Z",
+    "source": "noc-simulator",
+    "alert_type": "bgp_flap",
+    "severity": "major",
+    "device": "MIA-EDGE-02",
+    "interface": "Te0/0/0/1",
+    "metric": {
+      "name": "bgp_hold_timer_expiry",
+      "value": 1
+    },
+    "message": "BGP hold timer expired for neighbor 198.51.100.2 on MIA-EDGE-02",
+    "syslog": "<134>1 2026-11-04T02:03:20Z MIA-EDGE-02 BGP-5-ADJCHANGE: Te0/0/0/1 bgp_hold_timer_expiry=1 BGP hold timer expired for neighbor 198.51.100.2 on MIA-EDGE-02"
+  },
+  {
+    "event_id": "evt-0009",
+    "timestamp": "2026-11-04T02:03:25Z",
+    "source": "noc-simulator",
+    "alert_type": "bgp_flap",
+    "severity": "major",
+    "device": "MIA-EDGE-02",
+    "interface": "Te0/0/0/1",
+    "metric": {
+      "name": "bgp_neighbor_state",
+      "value": "up"
+    },
+    "message": "BGP neighbor 198.51.100.2 (AS 64512) state changed to up on MIA-EDGE-02 (flap 6/6)",
+    "syslog": "<134>1 2026-11-04T02:03:25Z MIA-EDGE-02 BGP-5-ADJCHANGE: Te0/0/0/1 bgp_neighbor_state=up BGP neighbor 198.51.100.2 (AS 64512) state changed to up on MIA-EDGE-02 (flap 6/6)"
+  },
+  {
+    "event_id": "evt-0010",
+    "timestamp": "2026-11-04T02:03:30Z",
+    "source": "noc-simulator",
+    "alert_type": "bgp_flap",
+    "severity": "critical",
+    "device": "MIA-EDGE-02",
+    "interface": "Te0/0/0/1",
+    "metric": {
+      "name": "bgp_prefix_count",
+      "value": 0
+    },
+    "message": "BGP neighbor 198.51.100.2 advertising 0 prefixes (was 18432)",
+    "syslog": "<134>1 2026-11-04T02:03:30Z MIA-EDGE-02 BGP-5-ADJCHANGE: Te0/0/0/1 bgp_prefix_count=0 BGP neighbor 198.51.100.2 advertising 0 prefixes (was 18432)"
+  },
+  {
+    "event_id": "evt-0011",
+    "timestamp": "2026-11-04T02:03:50Z",
+    "source": "noc-simulator",
+    "alert_type": "link_saturation",
+    "severity": "major",
+    "device": "MIA-EDGE-02",
+    "interface": "Te0/0/0/0",
+    "metric": {
+      "name": "link_utilization_pct",
+      "value": 88
+    },
+    "message": "Uplink Te0/0/0/0 utilization at 88% (threshold 80%) on MIA-EDGE-02",
+    "syslog": "<134>1 2026-11-04T02:03:50Z MIA-EDGE-02 LINK-4-UTILIZATION: Te0/0/0/0 link_utilization_pct=88 Uplink Te0/0/0/0 utilization at 88% (threshold 80%) on MIA-EDGE-02"
+  },
+  {
+    "event_id": "evt-0012",
+    "timestamp": "2026-11-04T02:04:00Z",
+    "source": "noc-simulator",
+    "alert_type": "ticket_created",
+    "severity": "major",
+    "device": "MIA-EDGE-02",
+    "interface": "Te0/0/0/1",
+    "metric": {
+      "name": "ticket_id",
+      "value": "INC-1042"
+    },
+    "message": "NOC engineer opened ticket for BGP flap on MIA-EDGE-02",
+    "ticket_id": "INC-1042",
+    "ticket_action": "created",
+    "syslog": "<134>1 2026-11-04T02:04:00Z MIA-EDGE-02 NOC-6-TICKET: Te0/0/0/1 ticket_id=INC-1042 NOC engineer opened ticket for BGP flap on MIA-EDGE-02"
+  },
+  {
+    "event_id": "evt-0013",
+    "timestamp": "2026-11-04T02:04:20Z",
+    "source": "noc-simulator",
+    "alert_type": "link_saturation",
+    "severity": "major",
+    "device": "MIA-EDGE-02",
+    "interface": "Te0/0/0/1",
+    "metric": {
+      "name": "link_utilization_pct",
+      "value": 79
+    },
+    "message": "Uplink Te0/0/0/1 utilization at 79% (threshold 80%) on MIA-EDGE-02",
+    "syslog": "<134>1 2026-11-04T02:04:20Z MIA-EDGE-02 LINK-4-UTILIZATION: Te0/0/0/1 link_utilization_pct=79 Uplink Te0/0/0/1 utilization at 79% (threshold 80%) on MIA-EDGE-02"
+  },
+  {
+    "event_id": "evt-0014",
+    "timestamp": "2026-11-04T02:04:40Z",
+    "source": "noc-simulator",
+    "alert_type": "link_saturation",
+    "severity": "major",
+    "device": "MIA-EDGE-02",
+    "interface": "Te0/0/0/0",
+    "metric": {
+      "name": "link_utilization_pct",
+      "value": 91
+    },
+    "message": "Uplink Te0/0/0/0 utilization at 91% (threshold 80%) on MIA-EDGE-02",
+    "syslog": "<134>1 2026-11-04T02:04:40Z MIA-EDGE-02 LINK-4-UTILIZATION: Te0/0/0/0 link_utilization_pct=91 Uplink Te0/0/0/0 utilization at 91% (threshold 80%) on MIA-EDGE-02"
+  },
+  {
+    "event_id": "evt-0015",
+    "timestamp": "2026-11-04T02:05:00Z",
+    "source": "noc-simulator",
+    "alert_type": "packet_loss",
+    "severity": "major",
+    "device": "MIA-AGG-01",
+    "interface": "Te0/0/1/0",
+    "metric": {
+      "name": "packet_loss_pct",
+      "value": 3.1
+    },
+    "message": "Packet loss 3.1% on MIA-AGG-01 Te0/0/1/0 towards customer edge",
+    "syslog": "<134>1 2026-11-04T02:05:00Z MIA-AGG-01 QOS-3-PACKETLOSS: Te0/0/1/0 packet_loss_pct=3.1 Packet loss 3.1% on MIA-AGG-01 Te0/0/1/0 towards customer edge"
+  },
+  {
+    "event_id": "evt-0016",
+    "timestamp": "2026-11-04T02:05:00Z",
+    "source": "noc-simulator",
+    "alert_type": "ticket_created",
+    "severity": "major",
+    "device": "MIA-EDGE-02",
+    "interface": "Te0/0/0/1",
+    "metric": {
+      "name": "ticket_id",
+      "value": "INC-1043"
+    },
+    "message": "Monitoring tool auto-opened ticket for uplink saturation on MIA-EDGE-02",
+    "ticket_id": "INC-1043",
+    "ticket_action": "created",
+    "syslog": "<134>1 2026-11-04T02:05:00Z MIA-EDGE-02 NOC-6-TICKET: Te0/0/0/1 ticket_id=INC-1043 Monitoring tool auto-opened ticket for uplink saturation on MIA-EDGE-02"
+  },
+  {
+    "event_id": "evt-0017",
+    "timestamp": "2026-11-04T02:05:30Z",
+    "source": "noc-simulator",
+    "alert_type": "link_saturation",
+    "severity": "major",
+    "device": "MIA-EDGE-02",
+    "interface": "Te0/0/0/0",
+    "metric": {
+      "name": "link_utilization_pct",
+      "value": 94
+    },
+    "message": "Uplink Te0/0/0/0 utilization at 94% (threshold 80%) on MIA-EDGE-02",
+    "syslog": "<134>1 2026-11-04T02:05:30Z MIA-EDGE-02 LINK-4-UTILIZATION: Te0/0/0/0 link_utilization_pct=94 Uplink Te0/0/0/0 utilization at 94% (threshold 80%) on MIA-EDGE-02"
+  },
+  {
+    "event_id": "evt-0018",
+    "timestamp": "2026-11-04T02:05:40Z",
+    "source": "noc-simulator",
+    "alert_type": "packet_loss",
+    "severity": "major",
+    "device": "MIA-AGG-01",
+    "interface": "Te0/0/1/0",
+    "metric": {
+      "name": "packet_loss_pct",
+      "value": 5.4
+    },
+    "message": "Packet loss 5.4% on MIA-AGG-01 Te0/0/1/0 towards customer edge",
+    "syslog": "<134>1 2026-11-04T02:05:40Z MIA-AGG-01 QOS-3-PACKETLOSS: Te0/0/1/0 packet_loss_pct=5.4 Packet loss 5.4% on MIA-AGG-01 Te0/0/1/0 towards customer edge"
+  },
+  {
+    "event_id": "evt-0019",
+    "timestamp": "2026-11-04T02:06:00Z",
+    "source": "noc-simulator",
+    "alert_type": "link_saturation",
+    "severity": "major",
+    "device": "MIA-EDGE-02",
+    "interface": "Te0/0/0/1",
+    "metric": {
+      "name": "link_utilization_pct",
+      "value": 86
+    },
+    "message": "Uplink Te0/0/0/1 utilization at 86% (threshold 80%) on MIA-EDGE-02",
+    "syslog": "<134>1 2026-11-04T02:06:00Z MIA-EDGE-02 LINK-4-UTILIZATION: Te0/0/0/1 link_utilization_pct=86 Uplink Te0/0/0/1 utilization at 86% (threshold 80%) on MIA-EDGE-02"
+  },
+  {
+    "event_id": "evt-0020",
+    "timestamp": "2026-11-04T02:06:00Z",
+    "source": "noc-simulator",
+    "alert_type": "ticket_created",
+    "severity": "major",
+    "device": "MIA-EDGE-02",
+    "interface": "Te0/0/0/1",
+    "metric": {
+      "name": "ticket_id",
+      "value": "INC-1044"
+    },
+    "message": "Customer ACME Corp reported packet loss, ticket opened",
+    "ticket_id": "INC-1044",
+    "ticket_action": "created",
+    "syslog": "<134>1 2026-11-04T02:06:00Z MIA-EDGE-02 NOC-6-TICKET: Te0/0/0/1 ticket_id=INC-1044 Customer ACME Corp reported packet loss, ticket opened"
+  },
+  {
+    "event_id": "evt-0021",
+    "timestamp": "2026-11-04T02:06:00Z",
+    "source": "noc-simulator",
+    "alert_type": "optical_degradation",
+    "severity": "minor",
+    "device": "DFW-CORE-01",
+    "interface": "Hu0/0/0/2",
+    "metric": {
+      "name": "optical_rx_power_dbm",
+      "value": -18.2
+    },
+    "message": "Optical Rx power -18.2 dBm on DFW-CORE-01 Hu0/0/0/2 (threshold -24 dBm)",
+    "syslog": "<134>1 2026-11-04T02:06:00Z DFW-CORE-01 OPTIC-4-RXPOWER: Hu0/0/0/2 optical_rx_power_dbm=-18.2 Optical Rx power -18.2 dBm on DFW-CORE-01 Hu0/0/0/2 (threshold -24 dBm)"
+  },
+  {
+    "event_id": "evt-0022",
+    "timestamp": "2026-11-04T02:06:30Z",
+    "source": "noc-simulator",
+    "alert_type": "link_saturation",
+    "severity": "critical",
+    "device": "MIA-EDGE-02",
+    "interface": "Te0/0/0/0",
+    "metric": {
+      "name": "link_utilization_pct",
+      "value": 96
+    },
+    "message": "Uplink Te0/0/0/0 utilization at 96% (threshold 80%) on MIA-EDGE-02",
+    "syslog": "<134>1 2026-11-04T02:06:30Z MIA-EDGE-02 LINK-4-UTILIZATION: Te0/0/0/0 link_utilization_pct=96 Uplink Te0/0/0/0 utilization at 96% (threshold 80%) on MIA-EDGE-02"
+  },
+  {
+    "event_id": "evt-0023",
+    "timestamp": "2026-11-04T02:06:40Z",
+    "source": "noc-simulator",
+    "alert_type": "packet_loss",
+    "severity": "major",
+    "device": "MIA-AGG-01",
+    "interface": "Te0/0/1/0",
+    "metric": {
+      "name": "packet_loss_pct",
+      "value": 7.8
+    },
+    "message": "Packet loss 7.8% on MIA-AGG-01 Te0/0/1/0 towards customer edge",
+    "syslog": "<134>1 2026-11-04T02:06:40Z MIA-AGG-01 QOS-3-PACKETLOSS: Te0/0/1/0 packet_loss_pct=7.8 Packet loss 7.8% on MIA-AGG-01 Te0/0/1/0 towards customer edge"
+  },
+  {
+    "event_id": "evt-0024",
+    "timestamp": "2026-11-04T02:07:30Z",
+    "source": "noc-simulator",
+    "alert_type": "link_saturation",
+    "severity": "critical",
+    "device": "MIA-EDGE-02",
+    "interface": "Te0/0/0/0",
+    "metric": {
+      "name": "link_utilization_pct",
+      "value": 97
+    },
+    "message": "Uplink Te0/0/0/0 utilization at 97% (threshold 80%) on MIA-EDGE-02",
+    "syslog": "<134>1 2026-11-04T02:07:30Z MIA-EDGE-02 LINK-4-UTILIZATION: Te0/0/0/0 link_utilization_pct=97 Uplink Te0/0/0/0 utilization at 97% (threshold 80%) on MIA-EDGE-02"
+  },
+  {
+    "event_id": "evt-0025",
+    "timestamp": "2026-11-04T02:07:40Z",
+    "source": "noc-simulator",
+    "alert_type": "packet_loss",
+    "severity": "major",
+    "device": "MIA-AGG-01",
+    "interface": "Te0/0/1/0",
+    "metric": {
+      "name": "packet_loss_pct",
+      "value": 9.6
+    },
+    "message": "Packet loss 9.6% on MIA-AGG-01 Te0/0/1/0 towards customer edge",
+    "syslog": "<134>1 2026-11-04T02:07:40Z MIA-AGG-01 QOS-3-PACKETLOSS: Te0/0/1/0 packet_loss_pct=9.6 Packet loss 9.6% on MIA-AGG-01 Te0/0/1/0 towards customer edge"
+  },
+  {
+    "event_id": "evt-0026",
+    "timestamp": "2026-11-04T02:07:40Z",
+    "source": "noc-simulator",
+    "alert_type": "optical_degradation",
+    "severity": "minor",
+    "device": "DFW-CORE-01",
+    "interface": "Hu0/0/0/2",
+    "metric": {
+      "name": "optical_rx_power_dbm",
+      "value": -20.1
+    },
+    "message": "Optical Rx power -20.1 dBm on DFW-CORE-01 Hu0/0/0/2 (threshold -24 dBm)",
+    "syslog": "<134>1 2026-11-04T02:07:40Z DFW-CORE-01 OPTIC-4-RXPOWER: Hu0/0/0/2 optical_rx_power_dbm=-20.1 Optical Rx power -20.1 dBm on DFW-CORE-01 Hu0/0/0/2 (threshold -24 dBm)"
+  },
+  {
+    "event_id": "evt-0027",
+    "timestamp": "2026-11-04T02:08:00Z",
+    "source": "noc-simulator",
+    "alert_type": "link_saturation",
+    "severity": "major",
+    "device": "MIA-EDGE-02",
+    "interface": "Te0/0/0/1",
+    "metric": {
+      "name": "link_utilization_pct",
+      "value": 93
+    },
+    "message": "Uplink Te0/0/0/1 utilization at 93% (threshold 80%) on MIA-EDGE-02",
+    "syslog": "<134>1 2026-11-04T02:08:00Z MIA-EDGE-02 LINK-4-UTILIZATION: Te0/0/0/1 link_utilization_pct=93 Uplink Te0/0/0/1 utilization at 93% (threshold 80%) on MIA-EDGE-02"
+  },
+  {
+    "event_id": "evt-0028",
+    "timestamp": "2026-11-04T02:08:40Z",
+    "source": "noc-simulator",
+    "alert_type": "link_saturation",
+    "severity": "critical",
+    "device": "MIA-EDGE-02",
+    "interface": "Te0/0/0/0",
+    "metric": {
+      "name": "link_utilization_pct",
+      "value": 95
+    },
+    "message": "Uplink Te0/0/0/0 utilization at 95% (threshold 80%) on MIA-EDGE-02",
+    "syslog": "<134>1 2026-11-04T02:08:40Z MIA-EDGE-02 LINK-4-UTILIZATION: Te0/0/0/0 link_utilization_pct=95 Uplink Te0/0/0/0 utilization at 95% (threshold 80%) on MIA-EDGE-02"
+  },
+  {
+    "event_id": "evt-0029",
+    "timestamp": "2026-11-04T02:09:00Z",
+    "source": "noc-simulator",
+    "alert_type": "packet_loss",
+    "severity": "critical",
+    "device": "MIA-AGG-01",
+    "interface": "Te0/0/1/0",
+    "metric": {
+      "name": "packet_loss_pct",
+      "value": 11.2
+    },
+    "message": "Packet loss 11.2% on MIA-AGG-01 Te0/0/1/0 towards customer edge",
+    "syslog": "<134>1 2026-11-04T02:09:00Z MIA-AGG-01 QOS-3-PACKETLOSS: Te0/0/1/0 packet_loss_pct=11.2 Packet loss 11.2% on MIA-AGG-01 Te0/0/1/0 towards customer edge"
+  },
+  {
+    "event_id": "evt-0030",
+    "timestamp": "2026-11-04T02:09:00Z",
+    "source": "noc-simulator",
+    "alert_type": "ticket_updated",
+    "severity": "major",
+    "device": "MIA-EDGE-02",
+    "interface": "Te0/0/0/1",
+    "metric": {
+      "name": "ticket_id",
+      "value": "INC-1042"
+    },
+    "message": "Engineer notes: loss correlates with BGP flap window",
+    "ticket_id": "INC-1042",
+    "ticket_action": "updated",
+    "syslog": "<134>1 2026-11-04T02:09:00Z MIA-EDGE-02 NOC-6-TICKET: Te0/0/0/1 ticket_id=INC-1042 Engineer notes: loss correlates with BGP flap window"
+  },
+  {
+    "event_id": "evt-0031",
+    "timestamp": "2026-11-04T02:09:20Z",
+    "source": "noc-simulator",
+    "alert_type": "packet_loss",
+    "severity": "critical",
+    "device": "MIA-CORE-01",
+    "interface": "Te0/0/2/0",
+    "metric": {
+      "name": "packet_loss_pct",
+      "value": 12.0
+    },
+    "message": "Packet loss 12.0% on MIA-CORE-01 Te0/0/2/0; 2 enterprise customers affected (ACME Corp, Globex)",
+    "syslog": "<134>1 2026-11-04T02:09:20Z MIA-CORE-01 QOS-3-PACKETLOSS: Te0/0/2/0 packet_loss_pct=12.0 Packet loss 12.0% on MIA-CORE-01 Te0/0/2/0; 2 enterprise customers affected (ACME Corp, Globex)"
+  },
+  {
+    "event_id": "evt-0032",
+    "timestamp": "2026-11-04T02:09:40Z",
+    "source": "noc-simulator",
+    "alert_type": "optical_degradation",
+    "severity": "major",
+    "device": "DFW-CORE-01",
+    "interface": "Hu0/0/0/2",
+    "metric": {
+      "name": "optical_rx_power_dbm",
+      "value": -22.4
+    },
+    "message": "Optical Rx power -22.4 dBm on DFW-CORE-01 Hu0/0/0/2 (threshold -24 dBm)",
+    "syslog": "<134>1 2026-11-04T02:09:40Z DFW-CORE-01 OPTIC-4-RXPOWER: Hu0/0/0/2 optical_rx_power_dbm=-22.4 Optical Rx power -22.4 dBm on DFW-CORE-01 Hu0/0/0/2 (threshold -24 dBm)"
+  },
+  {
+    "event_id": "evt-0033",
+    "timestamp": "2026-11-04T02:10:00Z",
+    "source": "noc-simulator",
+    "alert_type": "link_saturation",
+    "severity": "major",
+    "device": "MIA-EDGE-02",
+    "interface": "Te0/0/0/1",
+    "metric": {
+      "name": "link_utilization_pct",
+      "value": 90
+    },
+    "message": "Uplink Te0/0/0/1 utilization at 90% (threshold 80%) on MIA-EDGE-02",
+    "syslog": "<134>1 2026-11-04T02:10:00Z MIA-EDGE-02 LINK-4-UTILIZATION: Te0/0/0/1 link_utilization_pct=90 Uplink Te0/0/0/1 utilization at 90% (threshold 80%) on MIA-EDGE-02"
+  },
+  {
+    "event_id": "evt-0034",
+    "timestamp": "2026-11-04T02:10:20Z",
+    "source": "noc-simulator",
+    "alert_type": "packet_loss",
+    "severity": "critical",
+    "device": "MIA-AGG-01",
+    "interface": "Te0/0/1/0",
+    "metric": {
+      "name": "packet_loss_pct",
+      "value": 12.0
+    },
+    "message": "Packet loss 12.0% on MIA-AGG-01 Te0/0/1/0 towards customer edge",
+    "syslog": "<134>1 2026-11-04T02:10:20Z MIA-AGG-01 QOS-3-PACKETLOSS: Te0/0/1/0 packet_loss_pct=12.0 Packet loss 12.0% on MIA-AGG-01 Te0/0/1/0 towards customer edge"
+  },
+  {
+    "event_id": "evt-0035",
+    "timestamp": "2026-11-04T02:11:00Z",
+    "source": "noc-simulator",
+    "alert_type": "ticket_updated",
+    "severity": "major",
+    "device": "MIA-EDGE-02",
+    "interface": "Te0/0/0/1",
+    "metric": {
+      "name": "ticket_id",
+      "value": "INC-1043"
+    },
+    "message": "Auto-update: utilization still above 95%",
+    "ticket_id": "INC-1043",
+    "ticket_action": "updated",
+    "syslog": "<134>1 2026-11-04T02:11:00Z MIA-EDGE-02 NOC-6-TICKET: Te0/0/0/1 ticket_id=INC-1043 Auto-update: utilization still above 95%"
+  },
+  {
+    "event_id": "evt-0036",
+    "timestamp": "2026-11-04T02:11:40Z",
+    "source": "noc-simulator",
+    "alert_type": "packet_loss",
+    "severity": "critical",
+    "device": "MIA-AGG-01",
+    "interface": "Te0/0/1/0",
+    "metric": {
+      "name": "packet_loss_pct",
+      "value": 10.4
+    },
+    "message": "Packet loss 10.4% on MIA-AGG-01 Te0/0/1/0 towards customer edge",
+    "syslog": "<134>1 2026-11-04T02:11:40Z MIA-AGG-01 QOS-3-PACKETLOSS: Te0/0/1/0 packet_loss_pct=10.4 Packet loss 10.4% on MIA-AGG-01 Te0/0/1/0 towards customer edge"
+  },
+  {
+    "event_id": "evt-0037",
+    "timestamp": "2026-11-04T02:11:40Z",
+    "source": "noc-simulator",
+    "alert_type": "packet_loss",
+    "severity": "major",
+    "device": "MIA-AGG-01",
+    "interface": "Te0/0/1/1",
+    "metric": {
+      "name": "packet_loss_pct",
+      "value": 8.4
+    },
+    "message": "Packet loss 8.4% on MIA-AGG-01 Te0/0/1/1 (secondary path, load-shared)",
+    "syslog": "<134>1 2026-11-04T02:11:40Z MIA-AGG-01 QOS-3-PACKETLOSS: Te0/0/1/1 packet_loss_pct=8.4 Packet loss 8.4% on MIA-AGG-01 Te0/0/1/1 (secondary path, load-shared)"
+  },
+  {
+    "event_id": "evt-0038",
+    "timestamp": "2026-11-04T02:11:40Z",
+    "source": "noc-simulator",
+    "alert_type": "optical_degradation",
+    "severity": "major",
+    "device": "DFW-CORE-01",
+    "interface": "Hu0/0/0/2",
+    "metric": {
+      "name": "optical_rx_power_dbm",
+      "value": -24.1
+    },
+    "message": "Optical Rx power -24.1 dBm on DFW-CORE-01 Hu0/0/0/2 (threshold -24 dBm)",
+    "syslog": "<134>1 2026-11-04T02:11:40Z DFW-CORE-01 OPTIC-4-RXPOWER: Hu0/0/0/2 optical_rx_power_dbm=-24.1 Optical Rx power -24.1 dBm on DFW-CORE-01 Hu0/0/0/2 (threshold -24 dBm)"
+  },
+  {
+    "event_id": "evt-0039",
+    "timestamp": "2026-11-04T02:12:00Z",
+    "source": "noc-simulator",
+    "alert_type": "ticket_updated",
+    "severity": "major",
+    "device": "MIA-EDGE-02",
+    "interface": "Te0/0/0/1",
+    "metric": {
+      "name": "ticket_id",
+      "value": "INC-1044"
+    },
+    "message": "Customer confirms impact on 2 enterprise circuits",
+    "ticket_id": "INC-1044",
+    "ticket_action": "updated",
+    "syslog": "<134>1 2026-11-04T02:12:00Z MIA-EDGE-02 NOC-6-TICKET: Te0/0/0/1 ticket_id=INC-1044 Customer confirms impact on 2 enterprise circuits"
+  },
+  {
+    "event_id": "evt-0040",
+    "timestamp": "2026-11-04T02:13:00Z",
+    "source": "noc-simulator",
+    "alert_type": "packet_loss",
+    "severity": "major",
+    "device": "MIA-AGG-01",
+    "interface": "Te0/0/1/0",
+    "metric": {
+      "name": "packet_loss_pct",
+      "value": 7.1
+    },
+    "message": "Packet loss 7.1% on MIA-AGG-01 Te0/0/1/0 towards customer edge",
+    "syslog": "<134>1 2026-11-04T02:13:00Z MIA-AGG-01 QOS-3-PACKETLOSS: Te0/0/1/0 packet_loss_pct=7.1 Packet loss 7.1% on MIA-AGG-01 Te0/0/1/0 towards customer edge"
+  },
+  {
+    "event_id": "evt-0041",
+    "timestamp": "2026-11-04T02:13:20Z",
+    "source": "noc-simulator",
+    "alert_type": "optical_degradation",
+    "severity": "critical",
+    "device": "DFW-CORE-01",
+    "interface": "Hu0/0/0/2",
+    "metric": {
+      "name": "optical_rx_power_dbm",
+      "value": -25.0
+    },
+    "message": "Optical Rx power -25.0 dBm on DFW-CORE-01 Hu0/0/0/2 (threshold -24 dBm)",
+    "syslog": "<134>1 2026-11-04T02:13:20Z DFW-CORE-01 OPTIC-4-RXPOWER: Hu0/0/0/2 optical_rx_power_dbm=-25.0 Optical Rx power -25.0 dBm on DFW-CORE-01 Hu0/0/0/2 (threshold -24 dBm)"
+  },
+  {
+    "event_id": "evt-0042",
+    "timestamp": "2026-11-04T02:14:00Z",
+    "source": "noc-simulator",
+    "alert_type": "ticket_created",
+    "severity": "major",
+    "device": "DFW-CORE-01",
+    "interface": "Hu0/0/0/2",
+    "metric": {
+      "name": "ticket_id",
+      "value": "INC-1045"
+    },
+    "message": "Ticket opened for optical degradation on DFW-CORE-01",
+    "ticket_id": "INC-1045",
+    "ticket_action": "created",
+    "syslog": "<134>1 2026-11-04T02:14:00Z DFW-CORE-01 NOC-6-TICKET: Hu0/0/0/2 ticket_id=INC-1045 Ticket opened for optical degradation on DFW-CORE-01"
+  },
+  {
+    "event_id": "evt-0043",
+    "timestamp": "2026-11-04T02:14:20Z",
+    "source": "noc-simulator",
+    "alert_type": "packet_loss",
+    "severity": "major",
+    "device": "MIA-AGG-01",
+    "interface": "Te0/0/1/0",
+    "metric": {
+      "name": "packet_loss_pct",
+      "value": 4.2
+    },
+    "message": "Packet loss 4.2% on MIA-AGG-01 Te0/0/1/0 towards customer edge",
+    "syslog": "<134>1 2026-11-04T02:14:20Z MIA-AGG-01 QOS-3-PACKETLOSS: Te0/0/1/0 packet_loss_pct=4.2 Packet loss 4.2% on MIA-AGG-01 Te0/0/1/0 towards customer edge"
+  },
+  {
+    "event_id": "evt-0044",
+    "timestamp": "2026-11-04T02:15:40Z",
+    "source": "noc-simulator",
+    "alert_type": "packet_loss",
+    "severity": "major",
+    "device": "MIA-AGG-01",
+    "interface": "Te0/0/1/0",
+    "metric": {
+      "name": "packet_loss_pct",
+      "value": 1.8
+    },
+    "message": "Packet loss 1.8% on MIA-AGG-01 Te0/0/1/0 towards customer edge",
+    "syslog": "<134>1 2026-11-04T02:15:40Z MIA-AGG-01 QOS-3-PACKETLOSS: Te0/0/1/0 packet_loss_pct=1.8 Packet loss 1.8% on MIA-AGG-01 Te0/0/1/0 towards customer edge"
+  },
+  {
+    "event_id": "evt-0045",
+    "timestamp": "2026-11-04T02:16:00Z",
+    "source": "noc-simulator",
+    "alert_type": "packet_loss",
+    "severity": "minor",
+    "device": "MIA-AGG-01",
+    "interface": "Te0/0/1/0",
+    "metric": {
+      "name": "packet_loss_pct",
+      "value": 0.5
+    },
+    "message": "Packet loss recovered to 0.5% on MIA-AGG-01 Te0/0/1/0",
+    "syslog": "<134>1 2026-11-04T02:16:00Z MIA-AGG-01 QOS-3-PACKETLOSS: Te0/0/1/0 packet_loss_pct=0.5 Packet loss recovered to 0.5% on MIA-AGG-01 Te0/0/1/0"
+  },
+  {
+    "event_id": "evt-0046",
+    "timestamp": "2026-11-04T02:16:00Z",
+    "source": "noc-simulator",
+    "alert_type": "bgp_flap",
+    "severity": "minor",
+    "device": "MIA-EDGE-02",
+    "interface": "Te0/0/0/1",
+    "metric": {
+      "name": "bgp_neighbor_state",
+      "value": "up"
+    },
+    "message": "BGP neighbor 198.51.100.2 stable, 0 flaps in last 5 minutes",
+    "syslog": "<134>1 2026-11-04T02:16:00Z MIA-EDGE-02 BGP-5-ADJCHANGE: Te0/0/0/1 bgp_neighbor_state=up BGP neighbor 198.51.100.2 stable, 0 flaps in last 5 minutes"
+  },
+  {
+    "event_id": "evt-0047",
+    "timestamp": "2026-11-04T02:16:30Z",
+    "source": "noc-simulator",
+    "alert_type": "packet_loss",
+    "severity": "minor",
+    "device": "MIA-CORE-01",
+    "interface": "Te0/0/2/0",
+    "metric": {
+      "name": "packet_loss_pct",
+      "value": 0.4
+    },
+    "message": "Packet loss recovered to 0.4% on MIA-CORE-01 Te0/0/2/0",
+    "syslog": "<134>1 2026-11-04T02:16:30Z MIA-CORE-01 QOS-3-PACKETLOSS: Te0/0/2/0 packet_loss_pct=0.4 Packet loss recovered to 0.4% on MIA-CORE-01 Te0/0/2/0"
+  },
+  {
+    "event_id": "evt-0048",
+    "timestamp": "2026-11-04T02:17:00Z",
+    "source": "noc-simulator",
+    "alert_type": "link_saturation",
+    "severity": "minor",
+    "device": "MIA-EDGE-02",
+    "interface": "Te0/0/0/0",
+    "metric": {
+      "name": "link_utilization_pct",
+      "value": 62
+    },
+    "message": "Uplink Te0/0/0/0 utilization normalized to 62% on MIA-EDGE-02",
+    "syslog": "<134>1 2026-11-04T02:17:00Z MIA-EDGE-02 LINK-4-UTILIZATION: Te0/0/0/0 link_utilization_pct=62 Uplink Te0/0/0/0 utilization normalized to 62% on MIA-EDGE-02"
+  },
+  {
+    "event_id": "evt-0049",
+    "timestamp": "2026-11-04T02:18:00Z",
+    "source": "noc-simulator",
+    "alert_type": "ticket_updated",
+    "severity": "minor",
+    "device": "MIA-EDGE-02",
+    "interface": "Te0/0/0/1",
+    "metric": {
+      "name": "ticket_id",
+      "value": "INC-1042"
+    },
+    "message": "Incident monitoring: all customer metrics green for 5 minutes",
+    "ticket_id": "INC-1042",
+    "ticket_action": "updated",
+    "syslog": "<134>1 2026-11-04T02:18:00Z MIA-EDGE-02 NOC-6-TICKET: Te0/0/0/1 ticket_id=INC-1042 Incident monitoring: all customer metrics green for 5 minutes"
+  },
+  {
+    "event_id": "evt-0050",
+    "timestamp": "2026-11-04T02:20:00Z",
+    "source": "noc-simulator",
+    "alert_type": "ticket_updated",
+    "severity": "minor",
+    "device": "MIA-EDGE-02",
+    "interface": "Te0/0/0/1",
+    "metric": {
+      "name": "ticket_id",
+      "value": "INC-1042"
+    },
+    "message": "Incident ready for closure summary",
+    "ticket_id": "INC-1042",
+    "ticket_action": "updated",
+    "syslog": "<134>1 2026-11-04T02:20:00Z MIA-EDGE-02 NOC-6-TICKET: Te0/0/0/1 ticket_id=INC-1042 Incident ready for closure summary"
+  }
+]

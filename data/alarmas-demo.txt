@@ -1,0 +1,5 @@
+<134>1 2026-11-02T09:00:00Z MIA-EDGE-02 BGP-5-ADJCHANGE: Te0/0/0/1 bgp_neighbor_state=down BGP neighbor 198.51.100.8 state changed to down
+<134>1 2026-11-02T09:01:00Z MIA-EDGE-02 BGP-5-ADJCHANGE: Te0/0/0/1 bgp_neighbor_state=up BGP neighbor 198.51.100.8 state changed to up
+<134>1 2026-11-02T09:02:00Z MIA-EDGE-02 LINK-4-UTILIZATION: Te0/0/0/0 link_utilization_pct=92 Uplink utilization reached 92 percent
+<134>1 2026-11-02T09:03:00Z MIA-EDGE-02 QOS-3-PACKETLOSS: Te0/0/0/0 packet_loss_pct=7 Packet loss reached 7 percent
+<134>1 2026-11-02T09:04:00Z MIA-EDGE-02 NOC-6-TICKET: Te0/0/0/1 ticket_id=INC-2098 NOC engineer opened ticket for BGP instability
