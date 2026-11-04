@@ -16,7 +16,11 @@ Endpoints:
   POST /voice/transcribe           multipart audio file; returns {"text": "..."}
 
 POST /voice/query answers only the current NOC incident and never treats the
-question as instructions. POST /voice/audio calls ElevenLabs when
+question as instructions. A question longer than 500 characters gets a clear
+too-long message and is not truncated or answered. POST /alerts/import
+rejects text over 1 MB, more than 5000 lines, or any line over 4096
+characters. HTML tags, script tags, and destructive shell commands are
+ignored and counted, never stored as events. POST /voice/audio calls ElevenLabs when
 ELEVENLABS_API_KEY is set, caches the most recent clips, and does not call
 out again for a repeated line. It returns 503 when ElevenLabs is not
 configured and 502 when speech generation fails. POST /voice/transcribe
@@ -54,6 +58,10 @@ RUNBOOKS = load_runbooks()
 VOICE_AUDIO_CACHE = OrderedDict()
 VOICE_AUDIO_CACHE_LIMIT = 50
 MAX_AUDIO_BYTES = 8 * 1024 * 1024
+MAX_QUESTION_CHARS = 500
+MAX_IMPORT_BYTES = 1024 * 1024
+MAX_IMPORT_LINE_CHARS = 4096
+MAX_IMPORT_LINES = 5000
 
 # User text is matched as data. These patterns never become code or prompts.
 _MALICIOUS_RE = re.compile(
@@ -89,6 +97,16 @@ _GENERIC_ANSWER = (
     "or which customers are affected."
 )
 _REFUSAL = "Sorry, I can only answer questions about the current NOC incident."
+_TOO_LONG_ANSWER = "This question is too long (maximum 500 characters)."
+# Alarm text is data. These lines are dropped, never parsed into events.
+_SUSPICIOUS_LINE_RE = re.compile(
+    r"(?:"
+    r"<\s*/?\s*script\b|"
+    r"<\s*/?\s*[a-zA-Z][^>\n]*>|"
+    r"\brm\s+(?:-\S+\s+)*-(?:[a-z]*r[a-z]*f|[a-z]*f[a-z]*r)\b"
+    r")",
+    re.IGNORECASE,
+)
 
 SYSLOG_PATTERN = re.compile(
     r"^<\d+>\d+ (\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ) "
@@ -107,9 +125,12 @@ def parse_syslog_text(text):
     """Parse simulator-style syslog lines into webhook alert events."""
     parsed = []
     invalid = 0
-    for line_number, line in enumerate(text.splitlines(), 1):
-        line = line.strip()
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
         if not line:
+            continue
+        if _SUSPICIOUS_LINE_RE.search(raw_line):
+            invalid += 1
             continue
         match = SYSLOG_PATTERN.match(line)
         if not match:
@@ -150,6 +171,18 @@ def parse_syslog_text(text):
     return parsed, invalid
 
 
+def import_limit_error(text):
+    """Reject oversized alarm text before any line is stored."""
+    if len(text.encode("utf-8")) > MAX_IMPORT_BYTES:
+        return "Alarm text is too large (maximum 1 MB)."
+    lines = text.splitlines()
+    if len(lines) > MAX_IMPORT_LINES:
+        return "Alarm text has too many lines (maximum 5000)."
+    if any(len(line) > MAX_IMPORT_LINE_CHARS for line in lines):
+        return "A syslog line is too long (maximum 4096 characters)."
+    return None
+
+
 def incidents():
     return correlate(EVENTS)
 
@@ -187,6 +220,8 @@ def voice_answer(question):
     """Deterministic answers for the demo. Questions are data, never instructions."""
     if not isinstance(question, str) or not question.strip():
         return _GENERIC_ANSWER
+    if len(question) > MAX_QUESTION_CHARS:
+        return _TOO_LONG_ANSWER
     q = _fold(question)
     if _MALICIOUS_RE.search(q):
         return _REFUSAL
@@ -311,6 +346,10 @@ class Handler(BaseHTTPRequestHandler):
             text = body.get("text") if isinstance(body, dict) else None
             if not isinstance(text, str) or not text.strip():
                 self._send(400, {"error": "paste syslog alarm lines or select a non-empty text file"})
+                return
+            limit_error = import_limit_error(text)
+            if limit_error:
+                self._send(400, {"error": limit_error})
                 return
             events, invalid = parse_syslog_text(text)
             if not events:

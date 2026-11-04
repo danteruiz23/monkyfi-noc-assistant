@@ -18,7 +18,6 @@
   .import-box textarea{width:100%;min-height:110px;resize:vertical;border:1px solid #38506d;border-radius:10px;background:#0a1725;padding:12px;color:var(--text);font:inherit;font-size:12px}.import-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}.import-controls input[type=file]{max-width:100%;color:var(--muted);font-size:12px}.import-status{color:var(--muted);font-size:12px}
   @media(max-width:800px){body{padding:22px 16px 42px}.work-grid{grid-template-columns:1fr}.topbar{align-items:flex-start}.section{padding:16px}.toolbar{flex-wrap:wrap}#status{width:100%;margin-left:0}.detail-meta{font-size:12px}}
   @media(max-width:480px){.topbar{flex-direction:column}.ask-row{flex-direction:column}.ask-row #ask{width:100%}.voice-controls{flex-wrap:wrap}}
-  #record[aria-pressed="true"]{background:#5a2433;border-color:var(--red)}
 </style>
 </head>
 <body>
@@ -30,7 +29,7 @@
 <section class="section voice-section"><h2 class="voice-heading"><span class="live-dot" aria-hidden="true"></span><span data-i18n="askTitle">Ask the NOC Assistant</span></h2>
   <p class="subtitle" data-i18n="tryQuestion">Try a common NOC question:</p>
   <div class="suggestions"><button type="button" data-question-en="Which links are saturated right now?" data-question-es="¿Qué enlaces están saturados ahora?" data-en="Link saturation" data-es="Saturación de enlaces" data-i18n="sample1">Link saturation</button><button type="button" data-question-en="What is the probable cause?" data-question-es="¿Cuál es la causa probable?" data-en="Probable cause" data-es="Causa probable" data-i18n="sample2">Probable cause</button><button type="button" data-question-en="What is the impact?" data-question-es="¿Cuál es el impacto?" data-en="Incident impact" data-es="Impacto del incidente" data-i18n="sample3">Incident impact</button><button type="button" data-question-en="How many tickets were merged, and which ones?" data-question-es="¿Cuántos tickets se fusionaron y cuáles?" data-en="Merged tickets" data-es="Tickets fusionados" data-i18n="sample4">Merged tickets</button><button type="button" data-question-en="How long did the incident last?" data-question-es="¿Cuánto duró el incidente?" data-en="Incident duration" data-es="Duración del incidente" data-i18n="sample5">Incident duration</button><button type="button" data-question-en="Which customers are affected?" data-question-es="¿Qué clientes están afectados?" data-en="Affected customers" data-es="Clientes afectados" data-i18n="sample6">Affected customers</button></div>
-  <div class="ask-row"><input type="text" id="q" placeholder="Ask about the current incident…" aria-label="Ask about the current incident"><button type="button" id="record" aria-pressed="false" aria-label="Record question">Record</button><button type="button" id="listen" aria-label="Dictate question" title="Dictate question">🎙</button><button id="ask" data-i18n="askButton">Ask Copilot&nbsp; →</button></div>
+  <div class="ask-row"><input type="text" id="q" placeholder="Ask about the current incident…" aria-label="Ask about the current incident"><button type="button" id="listen" aria-label="Dictate question" title="Dictate question">🎙</button><button id="ask" data-i18n="askButton">Ask Copilot&nbsp; →</button></div>
   <div class="answer-wrap"><p class="answer-label" data-i18n="response">Assistant response</p><pre id="answer">Ask a question to see the incident briefing here.</pre></div>
   <div class="voice-controls"><button id="play" disabled data-i18n="play">▶ &nbsp;Play answer</button><audio id="audio" controls hidden aria-label="Spoken answer"></audio><small id="voice-status" role="status" aria-live="polite"></small></div>
 </section>
@@ -50,8 +49,8 @@ let language = localStorage.getItem('noc-language') || 'en';
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const brandText = s => String(s ?? '').replace(/\bcopilot\b/gi, 'Assistant');
-const words={en:{autoRefresh:'Auto-refresh every 5 seconds',askTitle:'Ask the NOC Assistant',tryQuestion:'Try a common NOC question:',sample1:'Link saturation',sample2:'Probable cause',sample3:'Incident impact',sample4:'Merged tickets',sample5:'Incident duration',sample6:'Affected customers',askButton:'Ask Assistant →',response:'Assistant response',play:'▶ Play answer',activeIncidents:'Active incidents',incidentDetail:'Incident detail',remediationSummary:'Remediation & ticket summary',refresh:'↻ Refresh incidents',thinking:'Analyzing the incident…',empty:'Ask a question to see the incident briefing here.',listen:'Dictate question',listening:'Listening…',micUnsupported:'Voice dictation is not supported in this browser.',record:'Record question',recording:'Recording…',transcribing:'Transcribing…',recordUnsupported:'Recording is not supported in this browser.',micDenied:'Microphone permission was denied.',notConfigured:'ElevenLabs is not configured',transcribeFailed:'Could not transcribe the audio.',importTitle:'Import alarms',importHelp:'Paste simulator-style syslog alarms or select a .txt file.',analyzeAlarms:'Analyze alarms',importing:'Importing alarms…',imported:n=>`Imported ${n} alarm(s).`},es:{autoRefresh:'Actualizar automáticamente cada 5 segundos',askTitle:'Pregunta al asistente NOC',tryQuestion:'Prueba una pregunta común de NOC:',sample1:'Saturación de enlaces',sample2:'Causa probable',sample3:'Impacto del incidente',sample4:'Tickets fusionados',sample5:'Duración del incidente',sample6:'Clientes afectados',askButton:'Consultar asistente →',response:'Respuesta del asistente',play:'▶ Reproducir respuesta',activeIncidents:'Incidentes activos',incidentDetail:'Detalle del incidente',remediationSummary:'Remediación y resumen del ticket',refresh:'↻ Actualizar incidentes',thinking:'Analizando el incidente…',empty:'Haz una pregunta para ver el resumen del incidente.',listen:'Dictar consulta',listening:'Escuchando…',micUnsupported:'Este navegador no admite dictado por voz.',record:'Grabar pregunta',recording:'Grabando…',transcribing:'Transcribiendo…',recordUnsupported:'Este navegador no admite grabación.',micDenied:'Se denegó el permiso del micrófono.',notConfigured:'ElevenLabs no está configurado',transcribeFailed:'No se pudo transcribir el audio.',importTitle:'Importar alarmas',importHelp:'Pega alarmas syslog del simulador o selecciona un archivo .txt.',analyzeAlarms:'Analizar alarmas',importing:'Importando alarmas…',imported:n=>`Se importaron ${n} alarma(s).`}};
-function applyLanguage(){const t=words[language];document.documentElement.lang=language;document.querySelectorAll('[data-set-language]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.setLanguage===language)));document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t[el.dataset.i18n]);$('refresh').textContent=t.refresh;$('q').placeholder=language==='es'?'Pregunta sobre el incidente actual…':'Ask about the current incident…';document.querySelectorAll('.suggestions button').forEach(b=>{b.textContent=b.dataset[language];b.dataset.question=b.getAttribute('data-question-'+language);});const record=$('record');if(record&&record.dataset.state!=='recording'&&record.dataset.state!=='transcribing'){record.textContent=t.record;record.title=t.record;record.setAttribute('aria-label',t.record);}if(!$('answer').dataset.hasAnswer)$('answer').textContent=t.empty;}
+const words={en:{autoRefresh:'Auto-refresh every 5 seconds',askTitle:'Ask the NOC Assistant',tryQuestion:'Try a common NOC question:',sample1:'Link saturation',sample2:'Probable cause',sample3:'Incident impact',sample4:'Merged tickets',sample5:'Incident duration',sample6:'Affected customers',askButton:'Ask Assistant →',response:'Assistant response',play:'▶ Play answer',activeIncidents:'Active incidents',incidentDetail:'Incident detail',remediationSummary:'Remediation & ticket summary',refresh:'↻ Refresh incidents',thinking:'Analyzing the incident…',empty:'Ask a question to see the incident briefing here.',listen:'Dictate question',listening:'Listening…',micUnsupported:'Voice dictation is not supported in this browser.',importTitle:'Import alarms',importHelp:'Paste simulator-style syslog alarms or select a .txt file.',analyzeAlarms:'Analyze alarms',importing:'Importing alarms…',imported:n=>`Imported ${n} alarm(s).`},es:{autoRefresh:'Actualizar automáticamente cada 5 segundos',askTitle:'Pregunta al asistente NOC',tryQuestion:'Prueba una pregunta común de NOC:',sample1:'Saturación de enlaces',sample2:'Causa probable',sample3:'Impacto del incidente',sample4:'Tickets fusionados',sample5:'Duración del incidente',sample6:'Clientes afectados',askButton:'Consultar asistente →',response:'Respuesta del asistente',play:'▶ Reproducir respuesta',activeIncidents:'Incidentes activos',incidentDetail:'Detalle del incidente',remediationSummary:'Remediación y resumen del ticket',refresh:'↻ Actualizar incidentes',thinking:'Analizando el incidente…',empty:'Haz una pregunta para ver el resumen del incidente.',listen:'Dictar consulta',listening:'Escuchando…',micUnsupported:'Este navegador no admite dictado por voz.',importTitle:'Importar alarmas',importHelp:'Pega alarmas syslog del simulador o selecciona un archivo .txt.',analyzeAlarms:'Analizar alarmas',importing:'Importando alarmas…',imported:n=>`Se importaron ${n} alarma(s).`}};
+function applyLanguage(){const t=words[language];document.documentElement.lang=language;document.querySelectorAll('[data-set-language]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.setLanguage===language)));document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t[el.dataset.i18n]);$('refresh').textContent=t.refresh;$('q').placeholder=language==='es'?'Pregunta sobre el incidente actual…':'Ask about the current incident…';document.querySelectorAll('.suggestions button').forEach(b=>{b.textContent=b.dataset[language];b.dataset.question=b.getAttribute('data-question-'+language);});if(!$('answer').dataset.hasAnswer)$('answer').textContent=t.empty;}
 document.querySelectorAll('[data-set-language]').forEach(button=>button.addEventListener('click',()=>{language=button.dataset.setLanguage;localStorage.setItem('noc-language',language);applyLanguage();}));
 applyLanguage();
 
@@ -127,66 +126,11 @@ let recognition=null;
 const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
 if(SpeechRecognition){recognition=new SpeechRecognition();recognition.interimResults=false;recognition.maxAlternatives=1;recognition.onstart=()=>{$('listen').textContent='●';$('listen').title=words[language].listening;$('voice-status').textContent=words[language].listening;};recognition.onresult=e=>{$('q').value=e.results[0][0].transcript;$('voice-status').textContent='';$('q').focus();};recognition.onerror=()=>{$('voice-status').textContent=language==='es'?'No se pudo reconocer el audio. Revisa el permiso del micrófono.':'Could not recognize speech. Check microphone permission.';};recognition.onend=()=>{$('listen').textContent='🎙';$('listen').title=words[language].listen;};}
 $('listen').addEventListener('click',()=>{if(!recognition){$('voice-status').textContent=words[language].micUnsupported;return;}recognition.lang=language==='es'?'es-ES':'en-US';recognition.start();});
-let mediaRecorder=null,recordChunks=[],recordStream=null,speakAfterAnswer=false;
-function resetRecordButton(){const button=$('record');button.disabled=false;button.dataset.state='';button.setAttribute('aria-pressed','false');button.textContent=words[language].record;button.title=words[language].record;}
-function shownVoiceError(message){if(message==='ElevenLabs no está configurado')return words[language].notConfigured;return message||words[language].transcribeFailed;}
-$('record').addEventListener('click',async()=>{
-  if(mediaRecorder&&mediaRecorder.state==='recording'){mediaRecorder.stop();return;}
-  if(!navigator.mediaDevices||!window.MediaRecorder){$('voice-status').textContent=words[language].recordUnsupported;return;}
-  try{
-    recordStream=await navigator.mediaDevices.getUserMedia({audio:true});
-    const mime=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':(MediaRecorder.isTypeSupported('audio/webm')?'audio/webm':'');
-    mediaRecorder=mime?new MediaRecorder(recordStream,{mimeType:mime}):new MediaRecorder(recordStream);
-    recordChunks=[];
-    mediaRecorder.ondataavailable=event=>{if(event.data&&event.data.size)recordChunks.push(event.data);};
-    mediaRecorder.onstop=async()=>{
-      if(recordStream){recordStream.getTracks().forEach(track=>track.stop());recordStream=null;}
-      const blob=new Blob(recordChunks,{type:mediaRecorder.mimeType||'audio/webm'});
-      recordChunks=[];
-      const button=$('record');
-      button.dataset.state='transcribing';
-      button.disabled=true;
-      button.setAttribute('aria-pressed','false');
-      button.textContent=words[language].transcribing;
-      $('voice-status').textContent=words[language].transcribing;
-      try{
-        if(!blob.size)throw new Error(words[language].transcribeFailed);
-        const body=new FormData();
-        const type=blob.type||'audio/webm';
-        const ext=type.includes('mp4')?'mp4':type.includes('ogg')?'ogg':'webm';
-        body.append('file',blob,`question.${ext}`);
-        const response=await fetch('/voice/transcribe',{method:'POST',body});
-        const payload=await response.json().catch(()=>({}));
-        if(!response.ok)throw new Error(shownVoiceError(payload.error));
-        const text=(payload.text||'').trim();
-        if(!text)throw new Error(words[language].transcribeFailed);
-        $('q').value=text;
-        $('voice-status').textContent='';
-        speakAfterAnswer=true;
-        $('ask').click();
-      }catch(error){
-        speakAfterAnswer=false;
-        $('voice-status').textContent=shownVoiceError(error.message);
-      }finally{resetRecordButton();mediaRecorder=null;}
-    };
-    mediaRecorder.start();
-    $('record').dataset.state='recording';
-    $('record').setAttribute('aria-pressed','true');
-    $('record').textContent=words[language].recording;
-    $('record').title=words[language].recording;
-    $('voice-status').textContent=words[language].recording;
-  }catch(error){
-    if(recordStream){recordStream.getTracks().forEach(track=>track.stop());recordStream=null;}
-    mediaRecorder=null;
-    resetRecordButton();
-    $('voice-status').textContent=words[language].micDenied;
-  }
-});
 document.querySelectorAll('.suggestions [data-question]').forEach(button =>
   button.addEventListener('click', () => { $('q').value = button.dataset.question; $('ask').click(); }));
 $('ask').addEventListener('click', async () => {
   const question = $('q').value.trim();
-  if (!question) { speakAfterAnswer = false; return; }
+  if (!question) return;
   $('play').disabled = true;
   $('audio').pause();
   $('audio').hidden = true;
@@ -200,12 +144,9 @@ $('ask').addEventListener('click', async () => {
     const answer = brandText((await r.json()).answer);
     $('answer').textContent = answer || '—';
     $('play').disabled = !answer;
-    if (speakAfterAnswer && answer) $('play').click();
   } catch (e) {
     $('answer').textContent = '—';
     $('voice-status').textContent = e.message;
-  } finally {
-    speakAfterAnswer = false;
   }
 });
 $('play').addEventListener('click', async () => {

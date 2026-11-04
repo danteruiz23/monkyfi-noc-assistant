@@ -19,7 +19,7 @@ From the repository root:
 python3 backend/app.py --load data/alerts.json
 ```
 
-Open <http://localhost:8000/>. To stream more simulated alerts, run this in a second terminal:
+Open <http://localhost:8000/>. `--load` already contains the full demo arc. Streaming the simulator on top of that load repeats every alert. To replay the arc into an empty backend, start `python3 backend/app.py` with no `--load`, then run this in a second terminal:
 
 ```bash
 python3 simulator/noc_simulator.py --stream --webhook http://localhost:8000/webhook
@@ -29,21 +29,21 @@ To try the alarm importer, select `data/alarmas-demo.txt` in the panel. Imported
 
 ## Demo (3 minutos)
 
-1. Start the backend from the repository root:
+1. In the terminal where `ELEVENLABS_API_KEY` is exported, start an empty backend:
 
 ```bash
-python3 backend/app.py --load data/alerts.json
+python3 backend/app.py
 ```
 
-2. In a second terminal, run the simulator:
+2. In a second terminal, run the simulator once:
 
 ```bash
 python3 simulator/noc_simulator.py --stream --webhook http://localhost:8000/webhook
 ```
 
-3. Open <http://localhost:8000/> and ask the three demo questions: link saturation, probable cause, and incident impact.
+3. Open <http://localhost:8000/>. The main incident should show 44 events, 19.5 minutes, and tickets INC-1042, INC-1043, and INC-1044.
 
-4. Press Play on an answer to hear it spoken aloud.
+4. Ask link saturation, probable cause, and incident impact. Use the microphone to dictate, then press Play to hear the answer.
 
 ## ElevenLabs voice
 
