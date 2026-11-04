@@ -27,6 +27,24 @@ python3 simulator/noc_simulator.py --stream --webhook http://localhost:8000/webh
 
 To try the alarm importer, select `data/alarmas-demo.txt` in the panel. Imported lines must use the simulator-style syslog format found in `data/syslog.txt`.
 
+## Demo (3 minutos)
+
+1. Start the backend from the repository root:
+
+```bash
+python3 backend/app.py --load data/alerts.json
+```
+
+2. In a second terminal, run the simulator:
+
+```bash
+python3 simulator/noc_simulator.py --stream --webhook http://localhost:8000/webhook
+```
+
+3. Open <http://localhost:8000/> and ask the three demo questions: link saturation, probable cause, and incident impact.
+
+4. Press Play on an answer to hear it spoken aloud.
+
 ## ElevenLabs voice
 
 Set `ELEVENLABS_API_KEY` in the environment of the terminal that starts the backend. Optionally set `ELEVENLABS_VOICE_ID` to choose a voice. Do not commit `.env` or API keys.

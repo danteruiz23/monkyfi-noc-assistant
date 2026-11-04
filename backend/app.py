@@ -1,35 +1,94 @@
 #!/usr/bin/env python3
-"""NOC Copilot backend skeleton (Python standard library only).
+"""NOC Copilot backend (Python standard library only).
 
-Endpoints (all JSON):
+Endpoints:
+  GET  /                           live incident panel (frontend/index.html)
   POST /webhook                    ingest one webhook-format alert event
+  POST /alerts/import              import simulator-style syslog alarm text
   GET  /incidents                  list correlated incidents
   GET  /incidents/<id>             incident detail + timeline
   GET  /incidents/<id>/remediation grounded remediation suggestion
   GET  /incidents/<id>/summary     ticket-closure summary draft
-  POST /voice/query {"question": "..."}  text answer for the voice demo
-       (spoken delivery via ElevenLabs is the llm_client.speak() integration
-        point; scaffolding returns text only, no live voice calls)
+  POST /voice/query {"question": "..."}
+                                   deterministic text answer for the voice demo
+  POST /voice/audio {"text": "..."}
+                                   spoken answer (audio/mpeg) via ElevenLabs
+  POST /voice/transcribe           multipart audio file; returns {"text": "..."}
+
+POST /voice/query answers only the current NOC incident and never treats the
+question as instructions. POST /voice/audio calls ElevenLabs when
+ELEVENLABS_API_KEY is set, caches the most recent clips, and does not call
+out again for a repeated line. It returns 503 when ElevenLabs is not
+configured and 502 when speech generation fails. POST /voice/transcribe
+returns 503 when ElevenLabs is not configured, 400 for empty or invalid
+audio, and 502 when transcription fails. It never invents a transcript.
 
 Run:  python3 app.py [--port 8000] [--load ../data/alerts.json]
 """
 
 import argparse
+import hashlib
 import json
+import os
 import re
 import sys
+import unicodedata
+from collections import OrderedDict
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
 
 sys.path.insert(0, __file__.rsplit("/", 1)[0])
 
-from correlator import correlate, peak_packet_loss, peak_utilization  # noqa: E402
+from correlator import (  # noqa: E402
+    affected_customers,
+    correlate,
+    peak_packet_loss,
+    peak_utilization,
+)
 from remediation import load_runbooks, suggest, suggestion_text  # noqa: E402
 from summarizer import draft_summary  # noqa: E402
-from llm_client import NotConfiguredError, VoiceServiceError, speak  # noqa: E402
+from llm_client import NotConfiguredError, VoiceServiceError, speak, transcribe  # noqa: E402
 
 EVENTS = []
 RUNBOOKS = load_runbooks()
+VOICE_AUDIO_CACHE = OrderedDict()
+VOICE_AUDIO_CACHE_LIMIT = 50
+MAX_AUDIO_BYTES = 8 * 1024 * 1024
+
+# User text is matched as data. These patterns never become code or prompts.
+_MALICIOUS_RE = re.compile(
+    r"("
+    r"\b(passwords?|credentials?|credenciales|contrasenas?|secrets?)\b|"
+    r"\bapi[-_ ]?keys?\b|\baccess tokens?\b|\bbearer\b|"
+    r"\b(sabot\w*|ddos|exploits?|malware|ransomware|hack(?:ing|er|ed)?)\b|"
+    r"\b(evadir|evade|evasion|bypass)\b|"
+    r"\bjailbreaks?\b|"
+    r"ignore (?:(?:all |any |previous |prior |above )*)(?:instructions|prompts)|"
+    r"\bsystem prompt\b|"
+    r"\bhow (?:do i|to) (?:attack|hack|exploit)\b|"
+    r"\b(?:shut ?down|take down|disable) (?:the )?(?:monitor\w*|alarms?|logging|controls)\b"
+    r")",
+    re.IGNORECASE,
+)
+_SCOPE_RE = re.compile(
+    r"("
+    r"\b(noc|incidents?|incidentes?|alerts?|alarmas?|links?|enlaces?)\b|"
+    r"\b(bgp|packets?|losses?|loss|uplinks?|devices?|dispositivos?)\b|"
+    r"\b(runbooks?|remedi\w*|customers?|clientes?|networks?|outages?)\b|"
+    r"\b(flaps?|optics?|utiliz\w*|summar(?:y|ies)|resumen\w*)\b|"
+    r"\b(satur\w*|causes?|causas?|impacts?|impactos?|tickets?|fusion\w*)\b|"
+    r"\b(durations?|duracion\w*|interfaces?|syslogs?|correlat\w*)\b|"
+    r"\b(routers?|switches?|latenc\w*|mia-|dfw-)\b|"
+    r"how long|cuanto duro"
+    r")",
+    re.IGNORECASE,
+)
+_GENERIC_ANSWER = (
+    "I can answer: which links are saturated, the probable cause, "
+    "the impact, which tickets were merged, how long the incident lasted, "
+    "or which customers are affected."
+)
+_REFUSAL = "Sorry, I can only answer questions about the current NOC incident."
 
 SYSLOG_PATTERN = re.compile(
     r"^<\d+>\d+ (\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ) "
@@ -102,9 +161,35 @@ def find_incident(incident_id):
     return None
 
 
+def _fold(text):
+    """Lowercase and strip accents so matching stays data-only."""
+    folded = unicodedata.normalize("NFD", text.lower())
+    return "".join(ch for ch in folded if unicodedata.category(ch) != "Mn")
+
+
+def cached_voice_audio(text):
+    """Return speech bytes, reusing the last 50 clips for the same text and voice."""
+    voice_id = os.environ.get("ELEVENLABS_VOICE_ID", "").strip() or "auto"
+    key = hashlib.sha256(f"{voice_id}\n{text}".encode("utf-8")).hexdigest()
+    cached = VOICE_AUDIO_CACHE.get(key)
+    if cached is not None:
+        VOICE_AUDIO_CACHE.move_to_end(key)
+        return cached
+    audio = speak(text, allow_live=True)
+    VOICE_AUDIO_CACHE[key] = audio
+    VOICE_AUDIO_CACHE.move_to_end(key)
+    while len(VOICE_AUDIO_CACHE) > VOICE_AUDIO_CACHE_LIMIT:
+        VOICE_AUDIO_CACHE.popitem(last=False)
+    return audio
+
+
 def voice_answer(question):
-    """Deterministic answers for the 3-minute demo questions."""
-    q = question.lower()
+    """Deterministic answers for the demo. Questions are data, never instructions."""
+    if not isinstance(question, str) or not question.strip():
+        return _GENERIC_ANSWER
+    q = _fold(question)
+    if _MALICIOUS_RE.search(q):
+        return _REFUSAL
     incs = incidents()
     main = incs[0] if incs else None
     if "satur" in q:
@@ -122,8 +207,28 @@ def voice_answer(question):
         return (f"{main['event_count']} alerts correlated into one incident. "
                 f"Peak packet loss {peak_packet_loss(main)}%, "
                 f"{len(main['ticket_ids'])} duplicate tickets merged.")
-    return ("I can answer: which links are saturated, the probable cause, "
-            "or the impact of the current incident.")
+    if "ticket" in q or "fusion" in q:
+        if not main:
+            return "No active incident."
+        tickets = main["ticket_ids"]
+        if not tickets:
+            return "No duplicate tickets were merged for the current incident."
+        return f"{len(tickets)} duplicate tickets merged: {', '.join(tickets)}."
+    if any(token in q for token in ("duration", "duracion", "how long", "lasted", "cuanto duro")):
+        if not main:
+            return "No active incident."
+        return (f"The incident lasted {main['duration_minutes']} minutes, "
+                f"from {main['start']} to {main['end']}.")
+    if "customer" in q or "cliente" in q:
+        if not main:
+            return "No active incident."
+        customers = affected_customers(main)
+        if not customers:
+            return "No affected customers are identified on the current incident."
+        return f"Affected customers: {', '.join(customers)}."
+    if _SCOPE_RE.search(q):
+        return _GENERIC_ANSWER
+    return _REFUSAL
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -138,6 +243,51 @@ class Handler(BaseHTTPRequestHandler):
     def _read_json(self):
         length = int(self.headers.get("Content-Length", 0))
         return json.loads(self.rfile.read(length) or b"{}")
+
+    def _read_audio_upload(self):
+        """Return (audio_bytes, content_type) from a multipart upload. Not stored."""
+        try:
+            length = int(self.headers.get("Content-Length", 0) or 0)
+        except ValueError:
+            raise ValueError("invalid multipart body")
+        if length <= 0:
+            raise ValueError("empty audio")
+        if length > MAX_AUDIO_BYTES:
+            raise ValueError("audio is too large")
+        body = self.rfile.read(length)
+        content_type = self.headers.get("Content-Type", "")
+        if not content_type.lower().startswith("multipart/"):
+            raise ValueError("invalid multipart body")
+        match = re.search(r'boundary="?([^";]+)"?', content_type, re.I)
+        if not match:
+            raise ValueError("invalid multipart body")
+        boundary = match.group(1).encode()
+        for chunk in body.split(b"--" + boundary):
+            if chunk in (b"", b"--", b"--\r\n") or chunk.startswith(b"--"):
+                continue
+            if chunk.startswith(b"\r\n"):
+                chunk = chunk[2:]
+            if chunk.endswith(b"\r\n"):
+                chunk = chunk[:-2]
+            header_blob, sep, data = chunk.partition(b"\r\n\r\n")
+            if not sep:
+                continue
+            header = header_blob.decode("iso-8859-1", errors="replace")
+            disposition = ""
+            part_type = "application/octet-stream"
+            for line in header.split("\r\n"):
+                lower = line.lower()
+                if lower.startswith("content-disposition:"):
+                    disposition = line
+                elif lower.startswith("content-type:"):
+                    part_type = line.split(":", 1)[1].strip()
+            name_match = re.search(r'name="([^"]*)"', disposition, re.I)
+            name = name_match.group(1) if name_match else ""
+            if name in ("file", "audio") or "filename=" in disposition.lower():
+                if not data:
+                    raise ValueError("empty audio")
+                return data, part_type
+        raise ValueError("audio file is missing")
 
     def _send_audio(self, audio):
         self.send_response(200)
@@ -182,11 +332,27 @@ class Handler(BaseHTTPRequestHandler):
                 self._send(400, {"error": "text must be a non-empty string"})
                 return
             try:
-                self._send_audio(speak(text, allow_live=True))
+                self._send_audio(cached_voice_audio(text))
             except NotConfiguredError:
                 self._send(503, {"error": "ElevenLabs is not configured"})
             except VoiceServiceError:
                 self._send(502, {"error": "ElevenLabs speech generation failed"})
+        elif path == "/voice/transcribe":
+            try:
+                audio, content_type = self._read_audio_upload()
+            except ValueError as exc:
+                self._send(400, {"error": str(exc)})
+                return
+            try:
+                text = transcribe(audio, allow_live=True, content_type=content_type)
+            except NotConfiguredError:
+                self._send(503, {"error": "ElevenLabs no está configurado"})
+            except ValueError:
+                self._send(400, {"error": "empty audio"})
+            except VoiceServiceError:
+                self._send(502, {"error": "ElevenLabs transcription failed"})
+            else:
+                self._send(200, {"text": text})
         else:
             self._send(404, {"error": "unknown endpoint"})
 
