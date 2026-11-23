@@ -1,205 +1,169 @@
 # HANDOFF — Monkyfi NOC Assistant
 
-**Phase:** Block A · Phase 3 — Questions, voice and guardrails
+**Phase:** Block A · Phase 4 — Guided demo, deploy and hardening
 **Date:** 23-nov-2026
-**Status:** Done (PR open, not merged)
-**Branch:** `claude/affectionate-gauss-a38rr4` (based on `main` @ `f3115d2`) · **PR:** https://github.com/danteruiz23/monkyfi-noc-assistant/pull/3 (base `main`) · **Commit:** `53ebdd1`
+**Status:** Partially done. The code, docs and checks are done (PR open, not merged). The **Vercel deploy and the production run of `demo-check.js` are pending**: they need Dante's Vercel account.
+**Branch:** `claude/zealous-bell-gd6cp7` (based on `main` @ `6ff3044`) · **PR:** https://github.com/danteruiz23/monkyfi-noc-assistant/pull/4 (base `main`) · **Commit:** `68edbae`
 
 ---
 
 ## a) Summary of tasks
 
-- [x] /prime phase 3: read SPEC and phase 2 HANDOFF. PR #2 was already merged into `main`. Ran `npm ci && npm test && npm run build` before any change: 447 tests passed, build OK.
-- [x] Impossible timestamps (month 13, 31-nov, 24:00, minute or second 60, year 0) are now **ignored and counted at import**, in Python (`backend/app.py`, using `correlator._parse_ts`) and in TS (`web/lib/syslog.ts`, using `parseTimestamp`). Fixtures regenerated. New parity cases: `parse.json` → `timestamps`. Imported data can no longer break `correlate()`.
-- [x] `web/lib/answers.ts` refactored into `answerParts()` plus `answerTextEn()`. `answerQuestion()` gives the same output, and all parity tests still pass. Spanish answers are in `answerText(parts, "es")` (`web/lib/localize.ts`).
-- [x] Monkyfi guardrails in `web/lib/guardrails.ts`, following the monkyfi-guardrails skill standard, adapted to an agent with no AI:
-  - each question is classified as `on_topic`, `off_topic`, `about_agent` or `manipulation`;
-  - off-topic and manipulation questions get fixed texts in EN/ES that never list rules, and count as strikes;
-  - from the 3rd strike the reply says "reported to Monkyfi's internal team", and the log line is `guardrail_report`;
-  - "What can you do?" or "Hola" gets the "what I do" text and is not a strike;
-  - commands ("Reboot MIA-EDGE-02") get the human-control text and are not strikes;
-  - pasted syslog lines are data: never obeyed, never a strike;
-  - network-domain words (OSNR, MPLS…) get the "what I can answer" text, not a strike;
-  - obfuscated manipulation is detected: base64, letters written one by one, Portuguese, role play, fiction, full-width letters.
-- [x] `POST /api/ask` (`web/lib/server/ask.ts`):
-  - checks, in order: same origin → JSON content type → limits of 20/min and 300/h per client → body size (1 MB + 64 KB, read as a stream) → data view → guardrails → answer;
-  - rebuilds the alarms on screen from `{demo, imported}`;
-  - logs redacted strikes, plus a trace line per turn without the question text;
-  - the client id is a hash of the IP.
-- [x] Screen 7 "Questions" (`web/components/screens/AskQuestions.tsx`):
-  - 6 demo question chips, a text box (Enter sends), a character counter;
-  - browser dictation (`SpeechRecognition`, `es-ES` / `en-US`) and a "Read answers aloud" toggle plus "Listen" per answer (`speechSynthesis`);
-  - mode badge on each answer, and an "answered from N alarms in M incidents" note;
-  - clear conversation; a note when the browser can't dictate.
-- [x] ElevenLabs is optional (`web/lib/server/tts.ts`, `/api/tts`). It is on only with `VOICE_PROVIDER=elevenlabs` **and** `ELEVENLABS_API_KEY` set.
-  - `GET` returns the provider.
-  - `POST` rebuilds the answer from the question, so it speaks only the assistant's own text.
-  - Refusals get 409 and are never sent to ElevenLabs.
-  - It has a limit of 10/min, a cache of 50 clips, and a 20 s timeout. On a 502 the browser voice reads instead.
-- [x] Every new visible text is in `web/lib/i18n.ts` (EN/ES). The "hard-coded JSX text" test passes.
-- [x] Python backend still works (checked over HTTP).
-- [x] Pushed and opened PR #3 (not merged).
+- [x] /prime phase 4: PR #3 was already merged; `npm ci && npm test && npm run build` → 572 passed, build OK, before any change.
+- [x] **Guided tour** "Start demo" / "Iniciar demo":
+  - 5 steps: replay (at 120×) → incident detail → remediation → closure → questions;
+  - step 5 asks "What is the probable cause?" on its own;
+  - Next from step 1 jumps the replay to the end;
+  - Back, Exit and Escape work at every step, and the page behind stays usable;
+  - the `/#tour` link starts the tour;
+  - new answers scroll into view above the tour panel (mobile).
+- [x] **Security review:**
+  - headers (CSP, frame-ancestors, X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy, HSTS, COOP/CORP);
+  - origin of the calls: `Sec-Fetch-Site` plus `Origin`, and `Origin: null` is refused;
+  - client IP from Vercel headers (`x-vercel-forwarded-for` → `x-real-ip` → `x-forwarded-for`, only when `VERCEL=1`);
+  - `maxDuration = 30` on the API routes;
+  - limits unchanged, and the cross-instance option is documented (Vercel Firewall rule).
+- [x] `web/vercel.json`: Next.js, `npm ci`, `npm run build`, no environment variables.
+- [x] `web/scripts/demo-check.js` (Playwright, `--url`, `--shots`, `--pace`), run with `npm run demo:check`.
+- [x] `web/DEMO.md`: a 5-minute script in EN and ES, a checklist before the call, likely questions, and a fallback plan.
+- [x] `web/README.md` (tour, deploy, security review, layout) and the root `README.md` are updated.
+- [x] Python backend still works.
+- [x] Pushed, and opened PR #4 (not merged).
+- [ ] **Vercel deploy.** Not done: the Vercel connector in this session has no create-project or deploy tool, and there is no Vercel CLI or token.
+- [ ] **`demo-check.js` on production.** Waits for the deploy.
+- [ ] **Command Center stage** (development → testing, with the link). Waits for the deploy.
 
 **Results (run at the end of the session):**
-- `cd web && npm test`: 6 files, **572 passed**. `test/guardrails.test.ts` alone has 107: 71 probes × EN/ES, 5 sequences, route, limits, log redaction, ElevenLabs mocked, Spanish facts.
-- `cd web && npm run typecheck` → OK
-- `cd web && npm run fixtures:check` → fixtures are up to date
-- `cd web && npm run build` → OK; `/` is static, `/api/ask` and `/api/tts` are dynamic. The data files are traced into the functions (checked in `.next/server/app/api/ask/route.js.nft.json`).
-- `next start` + curl:
-  - `/api/ask` (ES) returns the duration in Spanish;
-  - `GET /api/tts` returns `{"provider":"browser"}`;
-  - `POST /api/tts` returns 404 (voice off);
-  - an `Origin` from another site returns 403.
-- Playwright on `next start` (script in the session scratchpad, not in the repo):
-  - all 7 screens in EN/ES at 1280/375 px with no horizontal scroll;
-  - the 6 demo questions are correct in EN/ES;
-  - 3 off-topic questions give blocked → blocked → reported, and the server log has `guardrail_report`;
-  - dictation and read-aloud were tested with stub browser speech APIs and used the correct locale;
-  - no English UI words in ES; no console errors;
-  - an import with a month-13 line gives "Imported 1, Ignored 1", and the next question says 51 alarms.
-- `python3 backend/app.py --port 8123 --load data/alerts.json`:
-  - `/alerts/import` with a good line and a month-13 line returns `imported 1, ignored 1`;
-  - a 31-nov line alone is refused;
-  - `/incidents` keeps working (main incident: 44 events, 19.5 min, INC-1042–1044);
-  - `/voice/query` OK.
+- `cd web && npm test`: 7 files, **588 passed** (+16 in `test/security.test.ts`).
+- `cd web && npm run typecheck` → OK.
+- `cd web && npm run fixtures:check` → fixtures are up to date.
+- `cd web && npm run build` → OK; `/` is static, `/api/ask` and `/api/tts` are dynamic.
+- `cd web && npx next start -p 3100`, then `node scripts/demo-check.js --url http://localhost:3100` → **29/29 passed** (about 9 s).
+- `node scripts/demo-check.js --url http://0.0.0.0:3100` (remote mode: one shared client, 3.5 s between questions) → **29/29**, twice (about 77 s). The second run gave reported → reported → reported, which is accepted as designed.
+- `next dev`: the tour runs to step 5 with **0 console errors** under the dev CSP.
+- `python3 backend/app.py --port 8123 --load data/alerts.json` → `/incidents` main incident: 44 events, 19.5 min, `['INC-1042', 'INC-1043', 'INC-1044']`.
 
 ---
 
 ## b) Next steps for the next session
 
-1. Dante reviews PR #3: the questions screen, the wording of the fixed texts in ES, and the guardrail behaviour. Then he merges it or asks for changes.
-2. **Phase 4: guided tour, deploy and hardening** (Sonnet 5.5), SPEC §5:
-   - Guided tour "Iniciar demo": replay → incident → remediation → closure → question, in 5 steps.
-   - Vercel project `monkyfi-noc-assistant`, root `web`, install command `npm ci`. Set **no** voice variables for the public link.
-   - Security review:
-     - security headers (CSP, frame-ancestors, Referrer-Policy) in `web/next.config.ts`;
-     - confirm the client IP from Vercel headers (`x-forwarded-for` / `x-real-ip`) in `web/lib/server/http.ts`;
-     - decide whether a shared store (Vercel KV / Upstash) or a Vercel Firewall rule is needed for limits across instances.
-   - `web/scripts/demo-check.js`: reuse the Playwright checks above (7 screens, EN/ES, 1280/375, demo questions, 3 strikes, bad-date import). Run each part with a different `x-forwarded-for` or restart the server, because strikes persist per client for 1 h.
-   - `DEMO.md` (EN/ES, 5-minute script), README, and Command Center stage → testing with the link.
-3. Optional, if Dante wants ElevenLabs in a private demo: set `VOICE_PROVIDER=elevenlabs`, `ELEVENLABS_API_KEY` (and optionally `ELEVENLABS_VOICE_ID`) on a preview deployment and test one real clip.
+1. **Dante: deploy on Vercel** (about 3 minutes, steps in `web/README.md#deploy-on-vercel`):
+   - Add New → Project → `danteruiz23/monkyfi-noc-assistant`;
+   - name `monkyfi-noc-assistant`, **Root Directory `web`**;
+   - **no** environment variables;
+   - Deploy.
+
+   Merge PR #4 first, so production is built from `main`.
+2. From `web/`: `node scripts/demo-check.js --url https://<project>.vercel.app`. It must print 29/29, at 1280 and 375 px, in EN/ES.
+3. Optional: add the Vercel Firewall rule (`/api/` → rate limit 30 per 60 s per IP → 429), as described in the README.
+4. Test dictation with a real microphone in Chrome or Edge (steps 2–3 in `web/DEMO.md`).
+5. Command Center: move NOC Assistant from development to testing, with the production link.
+6. Rehearse `web/DEMO.md` once (5 min), in EN and ES.
+7. After that: Block B (phase 5, real alarm intake), once Dante answers the SPEC §6 open questions.
 
 **Prompt to start the next session (paste as is):**
 
-> Repo danteruiz23/monkyfi-noc-assistant, branch `main` (after PR #3 is merged; otherwise branch `claude/affectionate-gauss-a38rr4`). Run /prime phase 4: read docs/SPEC.md and docs/HANDOFF.md, check the code in web/, run `cd web && npm ci && npm test && npm run build`, and give me a short brief. Do NOT write code until I say ok. Then build SPEC Block A phase 4 (guided tour "Start demo" in 5 steps, Vercel deploy with root `web`, DEMO.md in EN/ES, web/scripts/demo-check.js, security review: headers, limits, call origin, client IP from Vercel headers), push and open a PR (do not merge). Rules: keep the Python backend working; synthetic data only, no secrets; public demo works with no AI key and no ElevenLabs key; every visible text in EN and ES. End with /hand-off.
+> Repo danteruiz23/monkyfi-noc-assistant, branch `main` (after PR #4 is merged; otherwise branch `claude/zealous-bell-gd6cp7`). Run /prime phase 4 closure: read docs/SPEC.md and docs/HANDOFF.md. The Vercel project is deployed at <PASTE PRODUCTION URL>. Run `cd web && npm ci && npm test && node scripts/demo-check.js --url <PRODUCTION URL>`, fix anything that fails (push and open a PR, do not merge), and give me the text to update the Command Center stage to testing with the link. Rules: keep the Python backend working; synthetic data only, no secrets; public demo works with no AI key and no ElevenLabs key; every visible text in EN and ES. End with /hand-off.
 
 ---
 
 ## c) Friction points
 
-1. **Native `SpeechRecognition` in Chromium.** The Playwright stub only replaced `webkitSpeechRecognition`. The app prefers the unprefixed `SpeechRecognition`, which headless Chromium has but which never returns a result.
-   Handled: the stub replaces both. App code unchanged.
-   Unresolved: dictation with a **real microphone** was not tested here (headless, no mic). Test by hand in Chrome/Edge/Safari before the demo.
-2. **Strikes persist across test runs.** A failed Playwright run left 3 strikes on one client, so the next run got "reported" on its first off-topic question.
-   Handled: restart `next start` between runs, and use a different `x-forwarded-for` per browser context. This is the designed behaviour: the count survives a cleared chat and a new tab.
-   Note for `demo-check.js`: on production, each check needs its own client or must stay under 3 strikes. Locally `x-forwarded-for` can be spoofed; on Vercel the platform sets it.
-3. **In-memory limits on serverless.** The rate limits and strike counts are per instance, so they are best effort.
-   Unresolved: decide in phase 4 whether a shared store or a firewall rule is needed. This is documented in `web/README.md` and the PR.
-4. **"Current incident" = earliest incident** (pre-existing, same as Python). After importing the 2-nov sample, the questions answer about the imported incident. Example: the saturation answer says "peaked at 0%", because that incident has no saturation and the text names MIA-EDGE-02 Te0/0/0/0 (a fixed Python string).
-   Not changed, to keep parity.
-   Unresolved: in a pilot, answer about the selected incident and drop the hard-coded interface. That needs a change in Python too.
-5. **ElevenLabs not called for real.** There is no key in this environment (correct: no secrets). The route is covered by mocked tests only.
+1. **No way to deploy from the session.**
+   - What happened: the Vercel MCP tools in this session cover AI Gateway, flags, drives and similar, but have no create-project or deploy tool. There is no `vercel` CLI and no token, which is correct: no secrets in the session.
+   - Handled: `web/vercel.json` plus step-by-step instructions in the README and the PR.
+   - Unresolved: the deploy and the production run of `demo-check.js`.
+2. **Strikes on production are shared.**
+   - What happened: on Vercel the client IP can't be spoofed, so every part of `demo-check.js` is one client. Strikes last 1 h, and the limit is 20 questions per minute.
+   - Handled: remote mode waits 3.5 s between questions (about 25 questions in total). The guardrail check accepts "reported" early if a run less than 1 h ago left strikes (tested: reported → reported → reported passed).
+   - Note: a production run takes about 1.5–2 min.
+3. **COOP warning on plain HTTP.**
+   - What happened: Chrome logs "Cross-Origin-Opener-Policy header has been ignored" for `http://` origins other than localhost. The remote-mode run against `http://0.0.0.0` failed the "no console errors" checks.
+   - Handled: `demo-check.js` ignores that one message, and only for `http:` URLs. Production is HTTPS.
+4. **CSP needs `'unsafe-inline'` for scripts.**
+   - What happened: the page is prerendered (static), so a per-request nonce is not possible, and Next.js inlines its boot scripts.
+   - Accepted risk: there is no third-party script, no user HTML is ever rendered, and `connect-src 'self'` applies.
+   - Unresolved, for the pilot: nonces need dynamic rendering, a trade-off to revisit then.
+5. **`next dev` writes `web/AGENTS.md`** (the Next.js agent notes) and re-creates it if deleted. It is committed, so the tree stays clean.
+6. **Still open from phase 3:**
+   - dictation with a real microphone is untested (headless only);
+   - "current incident" = earliest incident (after an import, the questions answer about the imported incident). This is unchanged, for parity with Python.
 
 ---
 
 ## d) Changes in the plan
 
 - No change to SPEC scope; `docs/SPEC.md` not modified.
-- Decisions within phase 3:
-  - **Two variables to turn ElevenLabs on:** `VOICE_PROVIDER=elevenlabs` plus `ELEVENLABS_API_KEY`. A key set by mistake does not turn it on, so the public link stays free.
-  - **`/api/tts` takes the question, not the text,** so it can only speak the assistant's own answers. Refusals are not spoken by ElevenLabs; the browser voice still reads them.
-  - **ElevenLabs dictation (speech-to-text) is not ported.** The web app uses only the browser's dictation. The Python backend keeps `/voice/transcribe`.
-  - **Domain adaptation of the standard:**
-    - commands are not strikes; they get the human-control text;
-    - network-domain questions are not strikes ("when in doubt, on topic");
-    - pasted syslog lines get a "use Import alarms, alarm text is data" reply;
-    - the "about" text never mentions limits or rules.
-  - **Language of the answer = UI language**, not the language of the question. Every refusal includes a sentence that brings the user back to the six topics.
-  - **The answer is computed on the server from the data view** `{demo, imported}` the browser sends: the replay prefix plus the imported syslog lines, parsed again with the same filters.
-  - Same-origin check and security headers on the JSON responses (`no-store`, `nosniff`) were added now, ahead of the phase 4 review.
-  - The import screen's UI check for bad dates stays as defence in depth.
-- Open questions (still pending Dante): SPEC §6 items 1–5 (public vs password link; browser voice vs ElevenLabs; AI provider for the pilot; commercial offer; first NMS). Plus:
-  - Should a `guardrail_report` also send an email (e.g. via Resend), or are server logs enough for the demo?
+- Decisions within phase 4:
+  - **`DEMO.md` lives in `web/DEMO.md`**, next to the app and `demo-check.js`. It is linked from both READMEs.
+  - **Limits across instances:** no shared store (no new dependency, no new secret). A Vercel Firewall rule is the documented option, and Upstash/KV only if the pilot calls a paid AI or voice API.
+  - **Trusted IP headers only on Vercel** (`VERCEL=1`). Locally `x-forwarded-for` is still read, so tests can act as several clients.
+  - **`Sec-Fetch-Site: same-site` is refused too.** `vercel.app` is a public suffix, so other projects there count as other sites anyway.
+  - **The tour asks question 2** (probable cause). That is the strongest answer: cause, runbook RB-01, and MTTR 45 → 8 min.
+  - **`DEMO.md` makes no claim of time saved.** A "10–15 min per incident" line was removed because it has no source in the data (veracity rule).
+- Open questions (pending Dante):
+  - SPEC §6, items 1–5 (public link vs password; voice; AI provider for the pilot; commercial offer; first NMS).
+  - Should a `guardrail_report` also send an email (e.g. Resend), or are server logs enough?
   - Delete the old `noc-web-demo` branch?
-
-### Guardrail controls (Monkyfi checklist)
-| Control | Status | Evidence or pending |
-|---|---|---|
-| Minimal permissions | N/A today | No tools, no accounts; ElevenLabs key only on the server, off by default. |
-| Financial actions | Covered | `transferir-dinero`, `datos-de-pago`, `aprobar-compra`, `refund-customer` are blocked. |
-| Authentication and roles | Partial | Fake admin and authorization are blocked (`falso-administrador`, `autorizacion-falsa-repetida`); the public demo has no login by design. |
-| Privacy and isolation | Covered | 5 privacy probes; no data of other users exists on the server. |
-| Injection in external content | Covered for alarm text | Pasted syslog lines are data (`pasted-syslog-injection`); imported lines with orders are parsed and answered from, never obeyed (route test). |
-| Errors and ambiguity | Covered | Bad data views → 400 with a fixed text; impossible timestamps ignored; too-long questions refused without a strike. |
-| Traceability | Partial | Strike and report lines (redacted, hashed client) plus a per-turn trace without content, in server logs only. |
-| Repeated attempts | Covered with a limit | 5 sequences (language change, fragmented, fake authorization). Count per client in memory, 1 h. |
-| Abuse and usage limits | Partial | 20/min, 300/h, size limits, same-origin; per instance only (friction 3). |
+  - A custom domain (e.g. `noc.monkyfi.com`) instead of `*.vercel.app`?
 
 ---
 
 ## e) File paths
 
 ### Entry points (API routes)
-- `web/app/api/ask/route.ts` — created: `POST /api/ask` → `handleAsk()`; Node runtime, dynamic.
-- `web/app/api/tts/route.ts` — created: `GET` / `POST /api/tts` → `handleTtsInfo()` / `handleTts()`.
-
-### Modules (`web/lib/`)
-- `web/lib/guardrails.ts` — created: classification, manipulation detection (with obfuscation), fixed replies, `StrikeCounter`, `RateLimiter`, `redactSensitive()`, `guardrailLogEntry()`.
-- `web/lib/server/ask.ts` — created: `/api/ask` handler, limits, data view (`currentEvents()`), cached demo data, strike log and trace.
-- `web/lib/server/tts.ts` — created: optional ElevenLabs read-aloud, `voiceProvider()`, cache, limit.
-- `web/lib/server/http.ts` — created: JSON response helper, client IP and hashed key, same-origin check, streamed body reader with a size cap.
-- `web/lib/voice.ts` — created: browser dictation and read-aloud helpers (locale, voice choice, error mapping).
-- `web/lib/answers.ts` — modified: `answerParts()` + `answerTextEn()`; `answerQuestion()` gives the same output.
-- `web/lib/localize.ts` — modified: `answerText(parts, lang)` with Spanish answers.
-- `web/lib/syslog.ts` — modified: ignores lines with impossible timestamps (`isValidTimestamp()`).
-- `web/lib/i18n.ts` — modified: `navAsk`, all `ask*` strings (screen 7 and fixed replies) in EN/ES; `impLimits` mentions impossible dates.
-- `web/lib/index.ts` — modified: exports `answerParts`, `answerTextEn`, `AnswerParts`, `AnswerTopic`.
+- `web/app/api/ask/route.ts`: modified. Adds `maxDuration = 30`.
+- `web/app/api/tts/route.ts`: modified. Adds `maxDuration = 30`.
 
 ### Components
-- `web/components/screens/AskQuestions.tsx` — created: screen 7 (questions, dictation, read-aloud, ElevenLabs when on).
-- `web/components/NocApp.tsx` — modified: 7th screen `ask` (`/#ask`), chat and draft state, data view `{demo, imported}`.
-- `web/components/screens/ImportAlarms.tsx` — modified: comment only (bad-date UI check is now defence in depth).
-- `web/app/globals.css` — modified: 7-column tabs (4 at 900 px), styles for chips, input, toggle and chat bubbles.
+- `web/components/GuidedTour.tsx`: created. The tour panel: step label, title, body, progress dots, Back / Next / Finish / Exit, Escape, focus on the title.
+- `web/components/NocApp.tsx`: modified.
+  - "Start demo" button in the header, tour state, `startTour()` (replay at 120×) and `showTourStep()` (finishes the replay, picks the main incident);
+  - the `/#tour` link;
+  - `autoAsk` for step 5.
+- `web/components/screens/AskQuestions.tsx`: modified. New props `autoQuestion` / `onAutoAsked` (asks one demo question once); scrolls each new answer into view.
+- `web/app/globals.css`: modified. Styles for `.top-actions`, `.tour*` and `.shell.touring` (bottom padding, scroll margin), and the mobile layout of the tour panel.
 
-### Python backend
-- `backend/app.py` — modified: `parse_syslog_text()` ignores and counts lines whose timestamp `_parse_ts()` rejects; docstring updated.
+### Modules (`web/lib/`)
+- `web/lib/tour.ts`: created. `TOUR_STEPS` (5 screens plus text keys), `TOUR_REPLAY_SPEED = 120`, `TOUR_QUESTION = "askQ2"`, `tourStep()`.
+- `web/lib/security-headers.ts`: created. `contentSecurityPolicy(dev)` and `securityHeaders(dev)`.
+- `web/lib/server/http.ts`: modified. `onVercel()`; `clientAddress()` reads the Vercel headers first on Vercel and caps the length at 64; `sameOrigin()` checks `Sec-Fetch-Site`.
+- `web/lib/i18n.ts`: modified. `tourStart`, `tourLabel`, `tourStepOf`, `tourNext`, `tourBack`, `tourExit`, `tourFinish`, `tour1Title` … `tour5Body`, in EN and ES.
 
 ### Configuration and environment
-- `web/next.config.ts` — modified: `outputFileTracingIncludes` adds `./data/**` to `/api/ask` and `/api/tts`.
-- `web/vitest.config.mts` — modified: alias `server-only` → `web/test/server-only-stub.ts`.
-- `web/.env.example` — created: placeholders only. Variable names: `VOICE_PROVIDER`, `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID`. None is needed for the public demo.
+- `web/next.config.ts`: modified. `headers()` applies `securityHeaders()` to `/:path*`.
+- `web/vercel.json`: created. Framework `nextjs`, `installCommand: npm ci`, `buildCommand: npm run build`, no `env`.
+- `web/package.json`: modified. New script `demo:check`. No new dependency.
+- Environment variables: **none needed for the public demo**. Optional, private only: `VOICE_PROVIDER`, `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID` (see `web/.env.example`). `VERCEL` is set by the platform.
 
-### Tests and fixtures
-- `web/test/guardrails.test.ts` — created: battery in EN/ES, sequences, units, Spanish facts, `/api/ask` route, limits, log redaction, `/api/tts` with mocked fetch.
-- `web/test/guardrail-probes.ts` — created: 71 NOC-adapted probes and 5 multi-turn sequences (Monkyfi standard battery).
-- `web/test/server-only-stub.ts` — created: empty module for Vitest.
-- `web/test/syslog.test.ts` — modified: timestamp parity cases; the fuzz corpus now asserts that no imported block breaks correlation.
-- `web/scripts/generate_fixtures.py` — modified: `IMPORT_TIMESTAMPS` and `parse.json` → `timestamps`.
-- `web/test/fixtures/parse.json` — modified: regenerated (new `timestamps` section).
-- `web/test/fixtures/fuzz.json` — modified: regenerated (bad-date lines now ignored).
+### Scripts and tests
+- `web/scripts/demo-check.js`: created. End-to-end check (HTTP, 7 screens × EN/ES × 1280/375 px, tour, 6 questions, import, strikes, console errors). It reads the texts from `web/lib/i18n.ts`.
+- `web/test/security.test.ts`: created. Headers, CSP, client IP on and off Vercel, origin checks, 403 from `/api/ask`, tour data, `vercel.json` without secrets.
 
 ### Docs
-- `web/README.md` — modified: phase 3 status, screen 7, guardrails, limits, voice and ElevenLabs, layout, tests.
-- `docs/HANDOFF.md` — modified: this handoff.
+- `web/DEMO.md`: created. 5-minute demo script in EN and ES.
+- `web/README.md`: modified. Status, guided demo, Vercel deploy, security review table, Firewall rule, `demo-check.js`, layout.
+- `README.md`: modified. "Web demo" section: tour, Vercel root `web`, link to `web/DEMO.md`.
+- `web/AGENTS.md`: created by `next dev` (Next.js agent notes), committed as generated.
+- `docs/HANDOFF.md`: modified. This handoff.
 
 ### Not changed
-- `data/`, `frontend/`, `simulator/`, `backend/correlator.py`, `backend/llm_client.py`, `web/data/`, `docs/SPEC.md`, `web/package.json`, `web/package-lock.json` (no new dependencies).
+- `backend/`, `data/`, `frontend/`, `simulator/`, `web/data/`, `web/test/fixtures/`, `docs/SPEC.md`, `web/package-lock.json`.
 
 ### Commands
 ```bash
 # Web app (from web/)
 cd web
 npm ci
-npm run dev              # http://localhost:3000  (screens: /#incidents ... /#import, /#ask)
-npm test                 # 572 tests
+npm run dev                  # http://localhost:3000   (guided demo: /#tour)
+npm test                     # 588 tests
 npm run typecheck
 npm run build
-npm start                # production build; stop with: pkill -f next-server
-npm run fixtures         # regenerate fixtures from Python
-npm run fixtures:check   # fail if fixtures are stale
-
-# Optional ElevenLabs read-aloud (never commit values): put VOICE_PROVIDER=elevenlabs and
-# ELEVENLABS_API_KEY in web/.env.local or in the Vercel project settings.
+npm start                    # production build; stop with: pkill -f next-server
+npm run demo:check           # end-to-end check against http://localhost:3000 (Playwright)
+node scripts/demo-check.js --url https://<project>.vercel.app   # against production
+node scripts/demo-check.js --url http://localhost:3000 --shots ./shots   # with screenshots
+npm run fixtures:check
 
 # Python backend (from repo root)
 python3 backend/app.py --load data/alerts.json   # http://localhost:8000
@@ -210,4 +174,5 @@ python3 backend/app.py --load data/alerts.json   # http://localhost:8000
 ## History
 - 23-nov-2026 · Phase 1 (Scaffold and ported logic) · Done · PR #1 on `noc-web-demo` (merged into `main`).
 - 23-nov-2026 · Phase 2 (Screens 1–6, EN/ES, live replay) · Done · PR #2 from `claude/loving-ritchie-cwuqj6` (merged into `main`).
-- 23-nov-2026 · Phase 3 (Questions, voice, guardrails, import timestamps) · Done · PR #3 from `claude/affectionate-gauss-a38rr4` to `main` (open).
+- 23-nov-2026 · Phase 3 (Questions, voice, guardrails, import timestamps) · Done · PR #3 from `claude/affectionate-gauss-a38rr4` (merged into `main`).
+- 23-nov-2026 · Phase 4 (Guided demo, security hardening, Vercel config, demo-check, DEMO.md) · Partially done (deploy pending Dante) · PR #4 from `claude/zealous-bell-gd6cp7` to `main` (open).
