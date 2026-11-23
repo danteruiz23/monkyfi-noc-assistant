@@ -21,6 +21,10 @@
  * Needs Playwright (preinstalled in Claude Code cloud sessions; elsewhere:
  * `npx playwright install chromium` and `npm i -D playwright` once).
  *
+ * Behind an HTTPS proxy (HTTPS_PROXY set, as in Claude Code cloud sessions), run
+ * with NODE_USE_ENV_PROXY=1 (Node >= 22.21): Node's built-in fetch, used by the
+ * HTTP checks, ignores HTTPS_PROXY otherwise and they fail with "fetch failed".
+ *
  * Local runs send a different x-forwarded-for per browser context, so limits and
  * strikes start fresh for each part. On Vercel the platform sets the client IP,
  * so every part shares one client: the script waits between questions to stay
@@ -413,6 +417,10 @@ async function main() {
   if (failed.length) {
     console.log("Failed:");
     for (const f of failed) console.log(`  - ${f.name}: ${f.detail}`);
+    const proxied = process.env.HTTPS_PROXY || process.env.https_proxy;
+    if (proxied && !process.env.NODE_USE_ENV_PROXY && failed.some((f) => f.detail === "fetch failed")) {
+      console.log("\nHint: HTTPS_PROXY is set, but Node's fetch ignores it. Run again with NODE_USE_ENV_PROXY=1.");
+    }
     process.exit(1);
   }
 }

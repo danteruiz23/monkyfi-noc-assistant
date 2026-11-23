@@ -9,6 +9,9 @@ See `../docs/SPEC.md` for the plan (Block A, phases 1–4).
 > script ([`DEMO.md`](DEMO.md), EN/ES) and the end-to-end check
 > (`scripts/demo-check.js`). Built on the deterministic logic ported in phase 1
 > (checked against Python).
+>
+> Live: **https://monkyfi-noc-assistant.vercel.app** (guided demo:
+> `/#tour`). `demo-check.js` passed 29/29 on it on 23-nov-2026.
 
 ## Screens
 
@@ -121,6 +124,14 @@ checks, 7 screens in EN/ES at 1280 and 375 px with no horizontal scroll and no
 untranslated text, the main incident facts, the 5-step tour, the 6 demo
 questions, a bad-date import, 3 off-topic strikes, and no console errors (a CSP
 violation would show up there). `--shots <dir>` saves screenshots.
+
+Behind an HTTPS proxy (for example a Claude Code cloud session), run it with
+`NODE_USE_ENV_PROXY=1` (Node 22.21 or newer). Without it, Node's built-in
+`fetch` ignores `HTTPS_PROXY` and the six HTTP checks fail with "fetch failed":
+
+```bash
+NODE_USE_ENV_PROXY=1 node scripts/demo-check.js --url https://monkyfi-noc-assistant.vercel.app
+```
 
 Node 20.9 or newer. Use `npm ci` (the lockfile is committed). Note: `npm install`
 of a *new* package with npm 10.9 can crash on Vitest's peer dependencies
