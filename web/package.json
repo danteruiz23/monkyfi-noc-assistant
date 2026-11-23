@@ -14,7 +14,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "fixtures": "python3 scripts/generate_fixtures.py",
-    "fixtures:check": "python3 scripts/generate_fixtures.py --check"
+    "fixtures:check": "python3 scripts/generate_fixtures.py --check",
+    "demo:check": "node scripts/demo-check.js"
   },
   "dependencies": {
     "next": "16.4.6",

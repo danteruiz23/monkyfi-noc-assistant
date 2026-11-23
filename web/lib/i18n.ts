@@ -205,6 +205,29 @@ export const STRINGS = {
     askBusy: "Too many questions in a short time. Wait a minute and try again.",
     askBadRequest: "The question could not be read. Try again.",
     askDataError: "The current alarm data could not be read. Reset the demo data in Import alarms and try again.",
+    // Guided tour ("Start demo")
+    tourStart: "Start demo",
+    tourLabel: "Guided demo",
+    tourStepOf: "Step {n} of {total}",
+    tourNext: "Next",
+    tourBack: "Back",
+    tourExit: "Exit demo",
+    tourFinish: "Finish",
+    tour1Title: "1. Live replay: 50 alarms arrive",
+    tour1Body:
+      "The simulator's 50 alarms play in your browser, sped up. Watch a BGP flap on MIA-EDGE-02 trigger saturation and packet loss on other devices, and three tickets get opened for the same problem. Press Next when you are ready: the replay jumps to the end.",
+    tour2Title: "2. One incident, not 44 alarms",
+    tour2Body:
+      "The assistant groups 44 alarms into one incident: probable cause, causal chain BGP flap → saturation → packet loss, affected customers and the three duplicate tickets merged (INC-1042 to INC-1044). The duration is 19.5 minutes.",
+    tour3Title: "3. Suggested remediation",
+    tour3Body:
+      "It matches the incident against the runbooks and suggests the best one, with the expected MTTR before and after. It is a recommendation: the NOC team decides and executes.",
+    tour4Title: "4. Closure summary",
+    tour4Body:
+      "The ticket closure is drafted for you. Edit it, copy it or export it as a text file. Every fact comes from the alarms on screen.",
+    tour5Title: "5. Ask a question",
+    tour5Body:
+      "Ask about the incident by typing or with your voice. The demo just asked “What is the probable cause?” for you. Try another question, or one that is off topic to see the guardrails.",
   },
   es: {
     title: "Monkyfi NOC Assistant",
@@ -394,6 +417,30 @@ export const STRINGS = {
     askBusy: "Demasiadas preguntas en poco tiempo. Espera un minuto e inténtalo de nuevo.",
     askBadRequest: "No se pudo leer la pregunta. Inténtalo de nuevo.",
     askDataError: "No se pudieron leer los datos de alarmas actuales. Restaura los datos de demo en Importar alarmas e inténtalo de nuevo.",
+
+    // Recorrido guiado ("Iniciar demo")
+    tourStart: "Iniciar demo",
+    tourLabel: "Demo guiada",
+    tourStepOf: "Paso {n} de {total}",
+    tourNext: "Siguiente",
+    tourBack: "Atrás",
+    tourExit: "Salir de la demo",
+    tourFinish: "Terminar",
+    tour1Title: "1. Reproducción en vivo: llegan 50 alarmas",
+    tour1Body:
+      "Las 50 alarmas del simulador se reproducen en tu navegador, aceleradas. Mira cómo un flap de BGP en MIA-EDGE-02 provoca saturación y pérdida de paquetes en otros equipos, y cómo se abren tres tickets para el mismo problema. Pulsa Siguiente cuando quieras: la reproducción salta al final.",
+    tour2Title: "2. Un incidente, no 44 alarmas",
+    tour2Body:
+      "El asistente agrupa 44 alarmas en un solo incidente: causa probable, cadena causal flap de BGP → saturación → pérdida de paquetes, clientes afectados y los tres tickets duplicados fusionados (INC-1042 a INC-1044). La duración es de 19.5 minutos.",
+    tour3Title: "3. Remediación sugerida",
+    tour3Body:
+      "Compara el incidente con los runbooks y sugiere el mejor, con el MTTR esperado antes y después. Es una recomendación: el equipo del NOC decide y ejecuta.",
+    tour4Title: "4. Resumen de cierre",
+    tour4Body:
+      "El cierre del ticket queda redactado. Puedes editarlo, copiarlo o exportarlo como archivo de texto. Cada dato sale de las alarmas en pantalla.",
+    tour5Title: "5. Haz una pregunta",
+    tour5Body:
+      "Pregunta sobre el incidente escribiendo o con tu voz. La demo acaba de preguntar «¿Cuál es la causa probable?» por ti. Prueba otra pregunta, o una ajena al tema para ver los guardrails.",
   },
 } as const satisfies Record<Lang, Record<string, string>>;
 
