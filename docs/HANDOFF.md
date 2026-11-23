@@ -2,7 +2,7 @@
 
 **Phase:** Block A · Phase 4 — Guided demo, deploy and hardening
 **Date:** 23-nov-2026
-**Status:** Partially done. The code, docs and checks are done (PR open, not merged). The **Vercel deploy and the production run of `demo-check.js` are pending**: they need Dante's Vercel account.
+**Status:** Done. PR #4 is merged. Production: **https://monkyfi-noc-assistant.vercel.app**. `demo-check.js` on production: **29/29** (23-nov-2026).
 **Branch:** `claude/zealous-bell-gd6cp7` (based on `main` @ `6ff3044`) · **PR:** https://github.com/danteruiz23/monkyfi-noc-assistant/pull/4 (base `main`) · **Commit:** `68edbae`
 
 ---
@@ -29,9 +29,11 @@
 - [x] `web/README.md` (tour, deploy, security review, layout) and the root `README.md` are updated.
 - [x] Python backend still works.
 - [x] Pushed, and opened PR #4 (not merged).
-- [ ] **Vercel deploy.** Not done: the Vercel connector in this session has no create-project or deploy tool, and there is no Vercel CLI or token.
-- [ ] **`demo-check.js` on production.** Waits for the deploy.
-- [ ] **Command Center stage** (development → testing, with the link). Waits for the deploy.
+- [x] **Vercel deploy.** Done by Dante (the Vercel connector here cannot create projects): https://monkyfi-noc-assistant.vercel.app
+- [x] **`demo-check.js` on production:** `NODE_USE_ENV_PROXY=1 node scripts/demo-check.js --url https://monkyfi-noc-assistant.vercel.app` → **29/29 passed** (77 s). This covers EN/ES at 1280/375 px, the tour, the 6 questions, the import, the 3 strikes and the headers.
+  - `NODE_USE_ENV_PROXY=1` is only needed in Claude Code cloud sessions: Node's `fetch` there ignores the session proxy. Without it the 6 HTTP checks fail with "fetch failed". On a Mac, run the command without it.
+  - The cloud session runs in a personal environment, `monkyfi-noc-assistant`, which only allows `monkyfi-noc-assistant.vercel.app`.
+- [ ] **Command Center stage** (development → testing, with the link). Pending: Dante.
 
 **Results (run at the end of the session):**
 - `cd web && npm test`: 7 files, **588 passed** (+16 in `test/security.test.ts`).
@@ -47,23 +49,15 @@
 
 ## b) Next steps for the next session
 
-1. **Dante: deploy on Vercel** (about 3 minutes, steps in `web/README.md#deploy-on-vercel`):
-   - Add New → Project → `danteruiz23/monkyfi-noc-assistant`;
-   - name `monkyfi-noc-assistant`, **Root Directory `web`**;
-   - **no** environment variables;
-   - Deploy.
-
-   Merge PR #4 first, so production is built from `main`.
-2. From `web/`: `node scripts/demo-check.js --url https://<project>.vercel.app`. It must print 29/29, at 1280 and 375 px, in EN/ES.
-3. Optional: add the Vercel Firewall rule (`/api/` → rate limit 30 per 60 s per IP → 429), as described in the README.
-4. Test dictation with a real microphone in Chrome or Edge (steps 2–3 in `web/DEMO.md`).
-5. Command Center: move NOC Assistant from development to testing, with the production link.
-6. Rehearse `web/DEMO.md` once (5 min), in EN and ES.
-7. After that: Block B (phase 5, real alarm intake), once Dante answers the SPEC §6 open questions.
+1. Command Center: move NOC Assistant from development to testing, with https://monkyfi-noc-assistant.vercel.app
+2. Optional: add the Vercel Firewall rule (`/api/` → rate limit 30 per 60 s per IP → 429), as described in the README.
+3. Test dictation with a real microphone in Chrome or Edge (steps 2–3 in `web/DEMO.md`).
+4. Rehearse `web/DEMO.md` once (5 min), in EN and ES.
+5. After that: Block B (phase 5, real alarm intake), once Dante answers the SPEC §6 open questions.
 
 **Prompt to start the next session (paste as is):**
 
-> Repo danteruiz23/monkyfi-noc-assistant, branch `main` (after PR #4 is merged; otherwise branch `claude/zealous-bell-gd6cp7`). Run /prime phase 4 closure: read docs/SPEC.md and docs/HANDOFF.md. The Vercel project is deployed at <PASTE PRODUCTION URL>. Run `cd web && npm ci && npm test && node scripts/demo-check.js --url <PRODUCTION URL>`, fix anything that fails (push and open a PR, do not merge), and give me the text to update the Command Center stage to testing with the link. Rules: keep the Python backend working; synthetic data only, no secrets; public demo works with no AI key and no ElevenLabs key; every visible text in EN and ES. End with /hand-off.
+> Repo danteruiz23/monkyfi-noc-assistant, branch `main`. Run /prime phase 5: read docs/SPEC.md and docs/HANDOFF.md, check the code in web/ and backend/, run `cd web && npm ci && npm test && npm run build`, and give me a short brief. Do NOT write code until I say ok. Before planning, list the SPEC §6 open questions that block phase 5 (first NMS to integrate, authentication for the webhook) and ask me. Rules: keep the Python backend working; the public demo at https://monkyfi-noc-assistant.vercel.app must keep passing `node scripts/demo-check.js` with no AI key and no ElevenLabs key; synthetic data only, no secrets; every visible text in EN and ES. End with /hand-off.
 
 ---
 
@@ -175,4 +169,4 @@ python3 backend/app.py --load data/alerts.json   # http://localhost:8000
 - 23-nov-2026 · Phase 1 (Scaffold and ported logic) · Done · PR #1 on `noc-web-demo` (merged into `main`).
 - 23-nov-2026 · Phase 2 (Screens 1–6, EN/ES, live replay) · Done · PR #2 from `claude/loving-ritchie-cwuqj6` (merged into `main`).
 - 23-nov-2026 · Phase 3 (Questions, voice, guardrails, import timestamps) · Done · PR #3 from `claude/affectionate-gauss-a38rr4` (merged into `main`).
-- 23-nov-2026 · Phase 4 (Guided demo, security hardening, Vercel config, demo-check, DEMO.md) · Partially done (deploy pending Dante) · PR #4 from `claude/zealous-bell-gd6cp7` to `main` (open).
+- 23-nov-2026 · Phase 4 (Guided demo, security hardening, Vercel config, demo-check, DEMO.md) · Done · PR #4 from `claude/zealous-bell-gd6cp7` (merged into `main`) · Production https://monkyfi-noc-assistant.vercel.app, demo-check 29/29.
