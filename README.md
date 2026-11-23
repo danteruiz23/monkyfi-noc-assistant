@@ -11,6 +11,12 @@ A local NOC incident assistant for ingesting alerts, correlating incidents, surf
 - Voice answers using ElevenLabs text-to-speech.
 - Python standard library backend; no extra pip dependencies.
 
+## Web demo (in progress)
+
+The Next.js version for the public demo link lives in [`web/`](web/README.md)
+(plan: [`docs/SPEC.md`](docs/SPEC.md)). It runs with synthetic data and no AI or
+voice keys. The Python backend below stays as the reference implementation.
+
 ## Run locally
 
 From the repository root:

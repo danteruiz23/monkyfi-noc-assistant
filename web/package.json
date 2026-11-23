@@ -1,0 +1,32 @@
+{
+  "name": "monkyfi-noc-assistant-web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Monkyfi NOC Assistant web demo (synthetic data, no AI or voice keys needed).",
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "fixtures": "python3 scripts/generate_fixtures.py",
+    "fixtures:check": "python3 scripts/generate_fixtures.py --check"
+  },
+  "dependencies": {
+    "next": "16.4.6",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "server-only": "0.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "typescript": "6.0.3",
+    "vitest": "5.1.0"
+  }
+}

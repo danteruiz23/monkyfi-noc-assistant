@@ -1,0 +1,169 @@
+[
+ {
+  "name": "exactly 1 MB ascii",
+  "recipe": [
+   [
+    "a",
+    1048576
+   ]
+  ],
+  "error": "A syslog line is too long (maximum 4096 characters)."
+ },
+ {
+  "name": "1 MB + 1 byte",
+  "recipe": [
+   [
+    "a",
+    1048577
+   ]
+  ],
+  "error": "Alarm text is too large (maximum 1 MB)."
+ },
+ {
+  "name": "1 MB with 3-byte chars",
+  "recipe": [
+   [
+    "€",
+    349525
+   ],
+   [
+    "a",
+    1
+   ]
+  ],
+  "error": "A syslog line is too long (maximum 4096 characters)."
+ },
+ {
+  "name": "1 MB + 1 with 3-byte chars",
+  "recipe": [
+   [
+    "€",
+    349525
+   ],
+   [
+    "ab",
+    1
+   ]
+  ],
+  "error": "Alarm text is too large (maximum 1 MB)."
+ },
+ {
+  "name": "4-byte chars at limit",
+  "recipe": [
+   [
+    "😀",
+    262144
+   ]
+  ],
+  "error": "A syslog line is too long (maximum 4096 characters)."
+ },
+ {
+  "name": "5000 lines",
+  "recipe": [
+   [
+    "x\n",
+    5000
+   ]
+  ],
+  "error": null
+ },
+ {
+  "name": "5001 lines",
+  "recipe": [
+   [
+    "x\n",
+    5001
+   ]
+  ],
+  "error": "Alarm text has too many lines (maximum 5000)."
+ },
+ {
+  "name": "5000 lines plus trailing text",
+  "recipe": [
+   [
+    "x\n",
+    5000
+   ],
+   [
+    "y",
+    1
+   ]
+  ],
+  "error": "Alarm text has too many lines (maximum 5000)."
+ },
+ {
+  "name": "5001 lines with \\r\\n",
+  "recipe": [
+   [
+    "x\r\n",
+    5001
+   ]
+  ],
+  "error": "Alarm text has too many lines (maximum 5000)."
+ },
+ {
+  "name": "5001 lines with \\u2028",
+  "recipe": [
+   [
+    "x ",
+    5001
+   ]
+  ],
+  "error": "Alarm text has too many lines (maximum 5000)."
+ },
+ {
+  "name": "5001 lines with \\x85",
+  "recipe": [
+   [
+    "x",
+    5001
+   ]
+  ],
+  "error": "Alarm text has too many lines (maximum 5000)."
+ },
+ {
+  "name": "4096 char line",
+  "recipe": [
+   [
+    "a",
+    4096
+   ]
+  ],
+  "error": null
+ },
+ {
+  "name": "4097 char line",
+  "recipe": [
+   [
+    "a",
+    4097
+   ]
+  ],
+  "error": "A syslog line is too long (maximum 4096 characters)."
+ },
+ {
+  "name": "4096 astral chars",
+  "recipe": [
+   [
+    "😀",
+    4096
+   ]
+  ],
+  "error": null
+ },
+ {
+  "name": "4097 astral chars",
+  "recipe": [
+   [
+    "😀",
+    4097
+   ]
+  ],
+  "error": "A syslog line is too long (maximum 4096 characters)."
+ },
+ {
+  "name": "empty",
+  "recipe": [],
+  "error": null
+ }
+]
