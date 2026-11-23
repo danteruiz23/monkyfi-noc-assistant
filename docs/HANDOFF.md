@@ -49,16 +49,15 @@
 
 ## b) Next steps for the next session
 
-1. Done: deploy and production check (29/29).
-2. Command Center: move NOC Assistant from development to testing, with https://monkyfi-noc-assistant.vercel.app
-3. Optional: add the Vercel Firewall rule (`/api/` → rate limit 30 per 60 s per IP → 429), as described in the README.
-4. Test dictation with a real microphone in Chrome or Edge (steps 2–3 in `web/DEMO.md`).
-6. Rehearse `web/DEMO.md` once (5 min), in EN and ES.
-7. After that: Block B (phase 5, real alarm intake), once Dante answers the SPEC §6 open questions.
+1. Command Center: move NOC Assistant from development to testing, with https://monkyfi-noc-assistant.vercel.app
+2. Optional: add the Vercel Firewall rule (`/api/` → rate limit 30 per 60 s per IP → 429), as described in the README.
+3. Test dictation with a real microphone in Chrome or Edge (steps 2–3 in `web/DEMO.md`).
+4. Rehearse `web/DEMO.md` once (5 min), in EN and ES.
+5. After that: Block B (phase 5, real alarm intake), once Dante answers the SPEC §6 open questions.
 
 **Prompt to start the next session (paste as is):**
 
-> Repo danteruiz23/monkyfi-noc-assistant, branch `main` (after PR #4 is merged; otherwise branch `claude/zealous-bell-gd6cp7`). Run /prime phase 4 closure: read docs/SPEC.md and docs/HANDOFF.md. The Vercel project is deployed at <PASTE PRODUCTION URL>. Run `cd web && npm ci && npm test && node scripts/demo-check.js --url <PRODUCTION URL>`, fix anything that fails (push and open a PR, do not merge), and give me the text to update the Command Center stage to testing with the link. Rules: keep the Python backend working; synthetic data only, no secrets; public demo works with no AI key and no ElevenLabs key; every visible text in EN and ES. End with /hand-off.
+> Repo danteruiz23/monkyfi-noc-assistant, branch `main`. Run /prime phase 5: read docs/SPEC.md and docs/HANDOFF.md, check the code in web/ and backend/, run `cd web && npm ci && npm test && npm run build`, and give me a short brief. Do NOT write code until I say ok. Before planning, list the SPEC §6 open questions that block phase 5 (first NMS to integrate, authentication for the webhook) and ask me. Rules: keep the Python backend working; the public demo at https://monkyfi-noc-assistant.vercel.app must keep passing `node scripts/demo-check.js` with no AI key and no ElevenLabs key; synthetic data only, no secrets; every visible text in EN and ES. End with /hand-off.
 
 ---
 
