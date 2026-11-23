@@ -1,168 +1,124 @@
 # HANDOFF — Monkyfi NOC Assistant
 
-**Phase:** Block A · Phase 4 — Guided demo, deploy and hardening
+**Phase:** Block A · Phase 4 closure — production check and Command Center update
 **Date:** 23-nov-2026
-**Status:** Partially done. The code, docs and checks are done (PR open, not merged). The **Vercel deploy and the production run of `demo-check.js` are pending**: they need Dante's Vercel account.
-**Branch:** `claude/zealous-bell-gd6cp7` (based on `main` @ `6ff3044`) · **PR:** https://github.com/danteruiz23/monkyfi-noc-assistant/pull/4 (base `main`) · **Commit:** `68edbae`
+**Status:** **Done.** Production at **https://monkyfi-noc-assistant.vercel.app** passes `demo-check.js` 29/29. The app needed no fix. One step is left for Dante: confirm the Command Center update (development → testing).
+**Branch:** `claude/brave-davinci-v0a6r2` (based on `main` @ `4e6a30e`, after PR #4 merged) · **PR:** https://github.com/danteruiz23/monkyfi-noc-assistant/pull/6 (base `main`, open, not merged)
 
 ---
 
 ## a) Summary of tasks
 
-- [x] /prime phase 4: PR #3 was already merged; `npm ci && npm test && npm run build` → 572 passed, build OK, before any change.
-- [x] **Guided tour** "Start demo" / "Iniciar demo":
-  - 5 steps: replay (at 120×) → incident detail → remediation → closure → questions;
-  - step 5 asks "What is the probable cause?" on its own;
-  - Next from step 1 jumps the replay to the end;
-  - Back, Exit and Escape work at every step, and the page behind stays usable;
-  - the `/#tour` link starts the tour;
-  - new answers scroll into view above the tour panel (mobile).
-- [x] **Security review:**
-  - headers (CSP, frame-ancestors, X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy, HSTS, COOP/CORP);
-  - origin of the calls: `Sec-Fetch-Site` plus `Origin`, and `Origin: null` is refused;
-  - client IP from Vercel headers (`x-vercel-forwarded-for` → `x-real-ip` → `x-forwarded-for`, only when `VERCEL=1`);
-  - `maxDuration = 30` on the API routes;
-  - limits unchanged, and the cross-instance option is documented (Vercel Firewall rule).
-- [x] `web/vercel.json`: Next.js, `npm ci`, `npm run build`, no environment variables.
-- [x] `web/scripts/demo-check.js` (Playwright, `--url`, `--shots`, `--pace`), run with `npm run demo:check`.
-- [x] `web/DEMO.md`: a 5-minute script in EN and ES, a checklist before the call, likely questions, and a fallback plan.
-- [x] `web/README.md` (tour, deploy, security review, layout) and the root `README.md` are updated.
-- [x] Python backend still works.
-- [x] Pushed, and opened PR #4 (not merged).
-- [ ] **Vercel deploy.** Not done: the Vercel connector in this session has no create-project or deploy tool, and there is no Vercel CLI or token.
-- [ ] **`demo-check.js` on production.** Waits for the deploy.
-- [ ] **Command Center stage** (development → testing, with the link). Waits for the deploy.
-
-**Results (run at the end of the session):**
-- `cd web && npm test`: 7 files, **588 passed** (+16 in `test/security.test.ts`).
-- `cd web && npm run typecheck` → OK.
-- `cd web && npm run fixtures:check` → fixtures are up to date.
-- `cd web && npm run build` → OK; `/` is static, `/api/ask` and `/api/tts` are dynamic.
-- `cd web && npx next start -p 3100`, then `node scripts/demo-check.js --url http://localhost:3100` → **29/29 passed** (about 9 s).
-- `node scripts/demo-check.js --url http://0.0.0.0:3100` (remote mode: one shared client, 3.5 s between questions) → **29/29**, twice (about 77 s). The second run gave reported → reported → reported, which is accepted as designed.
-- `next dev`: the tour runs to step 5 with **0 console errors** under the dev CSP.
-- `python3 backend/app.py --port 8123 --load data/alerts.json` → `/incidents` main incident: 44 events, 19.5 min, `['INC-1042', 'INC-1043', 'INC-1044']`.
+- [x] /prime phase 4 closure: read `docs/SPEC.md` and `docs/HANDOFF.md`. PR #4 was already merged into `main`.
+- [x] `cd web && npm ci && npm test` → 7 files, **588 passed**.
+- [x] Local production build: `npm run build`, then `npx next start -p 3100`, then `node scripts/demo-check.js --url http://localhost:3100` → **29/29** (10 s).
+- [x] Network access: this session moved to the existing personal environment `monkyfi-noc-assistant`, which allows only `monkyfi-noc-assistant.vercel.app`. The Default environment was not changed.
+- [x] **Production:** `NODE_USE_ENV_PROXY=1 node scripts/demo-check.js --url https://monkyfi-noc-assistant.vercel.app` → **29/29** (78 s), in EN and ES, at 1280 and 375 px. It covered:
+  - the security headers (CSP, HSTS, XFO DENY, COOP/CORP);
+  - 403 on calls from another site, 415 on non-JSON, 413 on oversized bodies;
+  - voice in the browser (no ElevenLabs);
+  - the tour, the 6 questions, the import, and blocked → blocked → reported.
+- [x] `demo-check.js`: prints a `NODE_USE_ENV_PROXY=1` hint when the HTTP checks fail with "fetch failed" behind a proxy. I confirmed the hint prints on a run without the variable.
+- [x] READMEs: production link added; the proxy note is in `web/README.md`.
+- [x] Python backend: `python3 backend/app.py --port 8123 --load data/alerts.json` → main incident 44 events, 19.5 min, `ticket_ids` INC-1042, INC-1043, INC-1044.
+- [x] `npm run typecheck` → OK; `npm run build` → OK.
+- [x] Pushed and opened PR #6 (not merged).
+- [x] Command Center text prepared (read-only check of the record; nothing written). The text is in b) step 2.
+- [ ] **Command Center write.** Pending Dante's explicit "yes".
 
 ---
 
 ## b) Next steps for the next session
 
-1. **Dante: deploy on Vercel** (about 3 minutes, steps in `web/README.md#deploy-on-vercel`):
-   - Add New → Project → `danteruiz23/monkyfi-noc-assistant`;
-   - name `monkyfi-noc-assistant`, **Root Directory `web`**;
-   - **no** environment variables;
-   - Deploy.
+1. Merge PR #6. It changes docs and tooling only; the production app is unchanged.
+2. **Command Center**: confirm the update, or paste it by hand. The record is `NOC Assistant` · project "Monkyfi Agent Portfolio" (Monkyfi LLC) · id `10745616-40df-4e36-a009-a1546a557a4f`.
 
-   Merge PR #4 first, so production is built from `main`.
-2. From `web/`: `node scripts/demo-check.js --url https://<project>.vercel.app`. It must print 29/29, at 1280 and 375 px, in EN/ES.
-3. Optional: add the Vercel Firewall rule (`/api/` → rate limit 30 per 60 s per IP → 429), as described in the README.
-4. Test dictation with a real microphone in Chrome or Edge (steps 2–3 in `web/DEMO.md`).
-5. Command Center: move NOC Assistant from development to testing, with the production link.
-6. Rehearse `web/DEMO.md` once (5 min), in EN and ES.
-7. After that: Block B (phase 5, real alarm intake), once Dante answers the SPEC §6 open questions.
+   | Field | Before | After |
+   |---|---|---|
+   | stage | development | testing |
+   | purpose | "…Corre solo en local (localhost:8000); no está desplegado en Vercel. La correlación, remediación y resúmenes usan reglas fijas; los prompts de Claude existen como plantillas pero aún no están conectados." | see below |
+
+   New `purpose`:
+   > Asistente para el NOC: recibe alarmas, las correlaciona en incidentes, propone remediación según runbooks y redacta resúmenes de cierre. Demo en vivo: https://monkyfi-noc-assistant.vercel.app (EN/ES, datos sintéticos, recorrido guiado en /#tour). Sin clave de IA ni de ElevenLabs: reglas fijas y voz del navegador. El backend Python queda como referencia local.
+
+   History note, title:
+   > Avance: NOC Assistant – demo en Vercel y paso a testing
+
+   History note, body:
+   > Etapa: development → testing. Demo en vivo: https://monkyfi-noc-assistant.vercel.app. demo-check.js 29/29 en producción el 23-nov-2026 (EN/ES, 1280 y 375 px, recorrido de 5 pasos, 6 preguntas, importar alarmas, guardrails, encabezados de seguridad). Sin clave de IA ni de voz. Repo: https://github.com/danteruiz23/monkyfi-noc-assistant (PR #4 y #6).
+3. Optional: add the Vercel Firewall rule (`/api/` → 30 requests per 60 s per IP → 429), as described in `web/README.md`.
+4. Test dictation with a real microphone in Chrome or Edge (`web/DEMO.md`, steps 2–3).
+5. Rehearse `web/DEMO.md` once in EN and once in ES (5 min each).
+6. Then Block B (phase 5, real alarm intake), once Dante answers the open questions in SPEC §6.
 
 **Prompt to start the next session (paste as is):**
 
-> Repo danteruiz23/monkyfi-noc-assistant, branch `main` (after PR #4 is merged; otherwise branch `claude/zealous-bell-gd6cp7`). Run /prime phase 4 closure: read docs/SPEC.md and docs/HANDOFF.md. The Vercel project is deployed at <PASTE PRODUCTION URL>. Run `cd web && npm ci && npm test && node scripts/demo-check.js --url <PRODUCTION URL>`, fix anything that fails (push and open a PR, do not merge), and give me the text to update the Command Center stage to testing with the link. Rules: keep the Python backend working; synthetic data only, no secrets; public demo works with no AI key and no ElevenLabs key; every visible text in EN and ES. End with /hand-off.
+> Repo danteruiz23/monkyfi-noc-assistant, branch `main` (after PR #6 is merged). Run /prime phase 5: read docs/SPEC.md and docs/HANDOFF.md. Phase 4 is closed (production https://monkyfi-noc-assistant.vercel.app, demo-check 29/29). Before building, list the SPEC §6 open questions that block phase 5 (real alarm intake: webhook and syslog from the client NMS, with authentication) and propose answers. Rules: keep the Python backend working; synthetic data only, no secrets; the public demo keeps working with no AI key and no ElevenLabs key; every visible text in EN and ES. End with /hand-off.
 
 ---
 
 ## c) Friction points
 
-1. **No way to deploy from the session.**
-   - What happened: the Vercel MCP tools in this session cover AI Gateway, flags, drives and similar, but have no create-project or deploy tool. There is no `vercel` CLI and no token, which is correct: no secrets in the session.
-   - Handled: `web/vercel.json` plus step-by-step instructions in the README and the PR.
-   - Unresolved: the deploy and the production run of `demo-check.js`.
-2. **Strikes on production are shared.**
-   - What happened: on Vercel the client IP can't be spoofed, so every part of `demo-check.js` is one client. Strikes last 1 h, and the limit is 20 questions per minute.
-   - Handled: remote mode waits 3.5 s between questions (about 25 questions in total). The guardrail check accepts "reported" early if a run less than 1 h ago left strikes (tested: reported → reported → reported passed).
-   - Note: a production run takes about 1.5–2 min.
-3. **COOP warning on plain HTTP.**
-   - What happened: Chrome logs "Cross-Origin-Opener-Policy header has been ignored" for `http://` origins other than localhost. The remote-mode run against `http://0.0.0.0` failed the "no console errors" checks.
-   - Handled: `demo-check.js` ignores that one message, and only for `http:` URLs. Production is HTTPS.
-4. **CSP needs `'unsafe-inline'` for scripts.**
-   - What happened: the page is prerendered (static), so a per-request nonce is not possible, and Next.js inlines its boot scripts.
-   - Accepted risk: there is no third-party script, no user HTML is ever rendered, and `connect-src 'self'` applies.
-   - Unresolved, for the pilot: nonces need dynamic rendering, a trade-off to revisit then.
-5. **`next dev` writes `web/AGENTS.md`** (the Next.js agent notes) and re-creates it if deleted. It is committed, so the tree stays clean.
-6. **Still open from phase 3:**
-   - dictation with a real microphone is untested (headless only);
-   - "current incident" = earliest incident (after an import, the questions answer about the imported incident). This is unchanged, for parity with Python.
+1. **The production URL was a placeholder.**
+   - What happened: the starting prompt still said `<PASTE PRODUCTION URL>`.
+   - Handled: I asked Dante; the answer was `monkyfi-noc-assistant.vercel.app`.
+2. **The session's network blocked `*.vercel.app`.**
+   - What happened: the proxy returned 403 on CONNECT.
+   - Handled: the session moved to the existing personal environment `monkyfi-noc-assistant`, which allows only that host. The Default environment was not changed. Start future sessions for this repo on that environment.
+3. **"fetch failed" on the six HTTP checks.**
+   - What happened: Node's built-in `fetch` ignores `HTTPS_PROXY` (Node 22.23 here). The browser checks passed, because Chromium uses the proxy.
+   - Handled: run with `NODE_USE_ENV_PROXY=1` → 29/29. The script now prints that hint, and the README documents it. A harmless `UNDICI-EHPA` "experimental" warning is printed.
+4. **Production strikes are shared** (unchanged from phase 4). Three production runs within an hour all passed; the guardrail check accepts "reported" early.
+5. **Still open from earlier phases:**
+   - real-microphone dictation is untested;
+   - the CSP needs `'unsafe-inline'` for scripts (static prerender);
+   - "current incident" = the earliest incident.
 
 ---
 
 ## d) Changes in the plan
 
-- No change to SPEC scope; `docs/SPEC.md` not modified.
-- Decisions within phase 4:
-  - **`DEMO.md` lives in `web/DEMO.md`**, next to the app and `demo-check.js`. It is linked from both READMEs.
-  - **Limits across instances:** no shared store (no new dependency, no new secret). A Vercel Firewall rule is the documented option, and Upstash/KV only if the pilot calls a paid AI or voice API.
-  - **Trusted IP headers only on Vercel** (`VERCEL=1`). Locally `x-forwarded-for` is still read, so tests can act as several clients.
-  - **`Sec-Fetch-Site: same-site` is refused too.** `vercel.app` is a public suffix, so other projects there count as other sites anyway.
-  - **The tour asks question 2** (probable cause). That is the strongest answer: cause, runbook RB-01, and MTTR 45 → 8 min.
-  - **`DEMO.md` makes no claim of time saved.** A "10–15 min per incident" line was removed because it has no source in the data (veracity rule).
-- Open questions (pending Dante):
-  - SPEC §6, items 1–5 (public link vs password; voice; AI provider for the pilot; commercial offer; first NMS).
-  - Should a `guardrail_report` also send an email (e.g. Resend), or are server logs enough?
-  - Delete the old `noc-web-demo` branch?
-  - A custom domain (e.g. `noc.monkyfi.com`) instead of `*.vercel.app`?
+- None to SPEC scope; `docs/SPEC.md` not modified. The phase 4 acceptance is met: `demo-check.js` has no failures in production, in EN/ES, at 1280 and 375 px.
+- The Command Center write was not done in this session: the request was for the text, and that skill writes only after an explicit "yes".
+- Open questions (pending Dante), unchanged:
+  - SPEC §6, items 1–5;
+  - email on `guardrail_report`?
+  - delete the old `noc-web-demo` branch?
+  - a custom domain (e.g. `noc.monkyfi.com`)?
 
 ---
 
 ## e) File paths
 
-### Entry points (API routes)
-- `web/app/api/ask/route.ts`: modified. Adds `maxDuration = 30`.
-- `web/app/api/tts/route.ts`: modified. Adds `maxDuration = 30`.
-
-### Components
-- `web/components/GuidedTour.tsx`: created. The tour panel: step label, title, body, progress dots, Back / Next / Finish / Exit, Escape, focus on the title.
-- `web/components/NocApp.tsx`: modified.
-  - "Start demo" button in the header, tour state, `startTour()` (replay at 120×) and `showTourStep()` (finishes the replay, picks the main incident);
-  - the `/#tour` link;
-  - `autoAsk` for step 5.
-- `web/components/screens/AskQuestions.tsx`: modified. New props `autoQuestion` / `onAutoAsked` (asks one demo question once); scrolls each new answer into view.
-- `web/app/globals.css`: modified. Styles for `.top-actions`, `.tour*` and `.shell.touring` (bottom padding, scroll margin), and the mobile layout of the tour panel.
-
-### Modules (`web/lib/`)
-- `web/lib/tour.ts`: created. `TOUR_STEPS` (5 screens plus text keys), `TOUR_REPLAY_SPEED = 120`, `TOUR_QUESTION = "askQ2"`, `tourStep()`.
-- `web/lib/security-headers.ts`: created. `contentSecurityPolicy(dev)` and `securityHeaders(dev)`.
-- `web/lib/server/http.ts`: modified. `onVercel()`; `clientAddress()` reads the Vercel headers first on Vercel and caps the length at 64; `sameOrigin()` checks `Sec-Fetch-Site`.
-- `web/lib/i18n.ts`: modified. `tourStart`, `tourLabel`, `tourStepOf`, `tourNext`, `tourBack`, `tourExit`, `tourFinish`, `tour1Title` … `tour5Body`, in EN and ES.
-
-### Configuration and environment
-- `web/next.config.ts`: modified. `headers()` applies `securityHeaders()` to `/:path*`.
-- `web/vercel.json`: created. Framework `nextjs`, `installCommand: npm ci`, `buildCommand: npm run build`, no `env`.
-- `web/package.json`: modified. New script `demo:check`. No new dependency.
-- Environment variables: **none needed for the public demo**. Optional, private only: `VOICE_PROVIDER`, `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID` (see `web/.env.example`). `VERCEL` is set by the platform.
-
-### Scripts and tests
-- `web/scripts/demo-check.js`: created. End-to-end check (HTTP, 7 screens × EN/ES × 1280/375 px, tour, 6 questions, import, strikes, console errors). It reads the texts from `web/lib/i18n.ts`.
-- `web/test/security.test.ts`: created. Headers, CSP, client IP on and off Vercel, origin checks, 403 from `/api/ask`, tour data, `vercel.json` without secrets.
+### Scripts
+- `web/scripts/demo-check.js`: modified.
+  - The header comment explains `NODE_USE_ENV_PROXY=1` behind a proxy.
+  - `main()` prints a hint when `HTTPS_PROXY` is set, `NODE_USE_ENV_PROXY` is not, and a check failed with "fetch failed".
 
 ### Docs
-- `web/DEMO.md`: created. 5-minute demo script in EN and ES.
-- `web/README.md`: modified. Status, guided demo, Vercel deploy, security review table, Firewall rule, `demo-check.js`, layout.
-- `README.md`: modified. "Web demo" section: tour, Vercel root `web`, link to `web/DEMO.md`.
-- `web/AGENTS.md`: created by `next dev` (Next.js agent notes), committed as generated.
+- `web/README.md`: modified. Live link in the status block; proxy note and command under the demo-check paragraph.
+- `README.md`: modified. Live link in the "Web demo" section.
 - `docs/HANDOFF.md`: modified. This handoff.
 
+### Configuration and environment
+- No repo config changed. Environment variables for the public demo: **none**. `VERCEL` is set by the platform. Optional, private only: `VOICE_PROVIDER`, `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID`.
+- Cloud session network (not in the repo): the personal environment `monkyfi-noc-assistant` allows `monkyfi-noc-assistant.vercel.app`.
+
 ### Not changed
-- `backend/`, `data/`, `frontend/`, `simulator/`, `web/data/`, `web/test/fixtures/`, `docs/SPEC.md`, `web/package-lock.json`.
+- `web/app/`, `web/components/`, `web/lib/`, `web/test/`, `web/data/`, `web/next.config.ts`, `web/vercel.json`, `web/package.json`, `web/package-lock.json`, `backend/`, `data/`, `frontend/`, `simulator/`, `docs/SPEC.md`.
 
 ### Commands
 ```bash
 # Web app (from web/)
 cd web
 npm ci
-npm run dev                  # http://localhost:3000   (guided demo: /#tour)
 npm test                     # 588 tests
 npm run typecheck
 npm run build
-npm start                    # production build; stop with: pkill -f next-server
-npm run demo:check           # end-to-end check against http://localhost:3000 (Playwright)
-node scripts/demo-check.js --url https://<project>.vercel.app   # against production
-node scripts/demo-check.js --url http://localhost:3000 --shots ./shots   # with screenshots
+npm run dev                  # http://localhost:3000   (guided demo: /#tour)
+npx next start -p 3100       # production build; stop with: pkill -f next-server
+node scripts/demo-check.js --url http://localhost:3100
+NODE_USE_ENV_PROXY=1 node scripts/demo-check.js --url https://monkyfi-noc-assistant.vercel.app   # production, behind a proxy
 npm run fixtures:check
 
 # Python backend (from repo root)
@@ -175,4 +131,5 @@ python3 backend/app.py --load data/alerts.json   # http://localhost:8000
 - 23-nov-2026 · Phase 1 (Scaffold and ported logic) · Done · PR #1 on `noc-web-demo` (merged into `main`).
 - 23-nov-2026 · Phase 2 (Screens 1–6, EN/ES, live replay) · Done · PR #2 from `claude/loving-ritchie-cwuqj6` (merged into `main`).
 - 23-nov-2026 · Phase 3 (Questions, voice, guardrails, import timestamps) · Done · PR #3 from `claude/affectionate-gauss-a38rr4` (merged into `main`).
-- 23-nov-2026 · Phase 4 (Guided demo, security hardening, Vercel config, demo-check, DEMO.md) · Partially done (deploy pending Dante) · PR #4 from `claude/zealous-bell-gd6cp7` to `main` (open).
+- 23-nov-2026 · Phase 4 (Guided demo, security hardening, Vercel config, demo-check, DEMO.md) · Partially done (deploy pending Dante) · PR #4 from `claude/zealous-bell-gd6cp7` (merged into `main`).
+- 23-nov-2026 · Phase 4 closure (production verified 29/29, proxy hint in demo-check) · Done · PR #6 from `claude/brave-davinci-v0a6r2` to `main` (open).
