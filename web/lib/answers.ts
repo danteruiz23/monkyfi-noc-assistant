@@ -9,7 +9,7 @@
 import { affectedCustomers, correlate, peakPacketLoss, peakUtilization } from "./correlator";
 import { ignoreCaseInput, pyFloatRepr, pyFold, pyLen, pyRegex, pyStr, pyStrip } from "./py";
 import { suggest, suggestionText } from "./remediation";
-import type { AlertEvent, Runbook } from "./types";
+import type { AlertEvent, Incident, Runbook, Suggestion } from "./types";
 
 export const MAX_QUESTION_CHARS = 500;
 
@@ -51,50 +51,79 @@ const SCOPE = pyRegex(
 
 const DURATION_TOKENS = ["duration", "duracion", "how long", "lasted", "cuanto duro"];
 
+/** Which branch of voice_answer() a question takes, with the data it needs. */
+export type AnswerTopic = "saturation" | "cause" | "impact" | "tickets" | "duration" | "customers";
+export type AnswerParts =
+  | { kind: "generic" }
+  | { kind: "too_long" }
+  | { kind: "refusal"; reason: "malicious" | "out_of_scope" }
+  | { kind: AnswerTopic; incident: Incident | null; suggestions: Suggestion[] };
+
 /**
- * Answer one question about the current incident (the earliest one).
+ * The branch of voice_answer() a question takes, without the final wording.
  * `question` may be any JSON value; only a non-blank string is answered.
  */
-export function answerQuestion(question: unknown, events: readonly AlertEvent[], runbooks: readonly Runbook[]): string {
-  if (typeof question !== "string" || !pyStrip(question)) return GENERIC_ANSWER;
-  if (pyLen(question) > MAX_QUESTION_CHARS) return TOO_LONG_ANSWER;
+export function answerParts(question: unknown, events: readonly AlertEvent[], runbooks: readonly Runbook[]): AnswerParts {
+  if (typeof question !== "string" || !pyStrip(question)) return { kind: "generic" };
+  if (pyLen(question) > MAX_QUESTION_CHARS) return { kind: "too_long" };
   const q = pyFold(question);
   const qMatch = ignoreCaseInput(q);
-  if (MALICIOUS.test(qMatch)) return REFUSAL;
+  if (MALICIOUS.test(qMatch)) return { kind: "refusal", reason: "malicious" };
   const incidents = correlate(events);
-  const main = incidents.length ? incidents[0] : null;
+  const incident = incidents.length ? incidents[0] : null;
+  const topic = (kind: AnswerTopic): AnswerParts => ({
+    kind,
+    incident,
+    suggestions: kind === "cause" && incident ? suggest(incident, runbooks) : [],
+  });
 
-  if (q.includes("satur")) {
-    if (!main) return "No saturation alerts right now.";
-    return `Uplink Te0/0/0/0 on MIA-EDGE-02 peaked at ${pyStr(peakUtilization(main))}% utilization.`;
+  if (q.includes("satur")) return topic("saturation");
+  if (q.includes("causa") || q.includes("cause") || q.includes("probable")) return topic("cause");
+  if (q.includes("impact")) return topic("impact");
+  if (q.includes("ticket") || q.includes("fusion")) return topic("tickets");
+  if (DURATION_TOKENS.some((t) => q.includes(t))) return topic("duration");
+  if (q.includes("customer") || q.includes("cliente")) return topic("customers");
+  if (SCOPE.test(qMatch)) return { kind: "generic" };
+  return { kind: "refusal", reason: "out_of_scope" };
+}
+
+/** The English wording of voice_answer() (the Python backend's exact text). */
+export function answerTextEn(parts: AnswerParts): string {
+  if (parts.kind === "generic") return GENERIC_ANSWER;
+  if (parts.kind === "too_long") return TOO_LONG_ANSWER;
+  if (parts.kind === "refusal") return REFUSAL;
+  const main = parts.incident;
+  switch (parts.kind) {
+    case "saturation":
+      if (!main) return "No saturation alerts right now.";
+      return `Uplink Te0/0/0/0 on MIA-EDGE-02 peaked at ${pyStr(peakUtilization(main))}% utilization.`;
+    case "cause":
+      if (!main) return "No active incident to diagnose.";
+      return suggestionText(main, parts.suggestions);
+    case "impact":
+      if (!main) return "No active incident.";
+      return (
+        `${main.event_count} alerts correlated into one incident. ` +
+        `Peak packet loss ${pyStr(peakPacketLoss(main))}%, ` +
+        `${main.ticket_ids.length} duplicate tickets merged.`
+      );
+    case "tickets":
+      if (!main) return "No active incident.";
+      if (main.ticket_ids.length === 0) return "No duplicate tickets were merged for the current incident.";
+      return `${main.ticket_ids.length} duplicate tickets merged: ${main.ticket_ids.join(", ")}.`;
+    case "duration":
+      if (!main) return "No active incident.";
+      return `The incident lasted ${pyFloatRepr(main.duration_minutes)} minutes, from ${main.start} to ${main.end}.`;
+    case "customers": {
+      if (!main) return "No active incident.";
+      const customers = affectedCustomers(main);
+      if (customers.length === 0) return "No affected customers are identified on the current incident.";
+      return `Affected customers: ${customers.join(", ")}.`;
+    }
   }
-  if (q.includes("causa") || q.includes("cause") || q.includes("probable")) {
-    if (!main) return "No active incident to diagnose.";
-    return suggestionText(main, suggest(main, runbooks));
-  }
-  if (q.includes("impact")) {
-    if (!main) return "No active incident.";
-    return (
-      `${main.event_count} alerts correlated into one incident. ` +
-      `Peak packet loss ${pyStr(peakPacketLoss(main))}%, ` +
-      `${main.ticket_ids.length} duplicate tickets merged.`
-    );
-  }
-  if (q.includes("ticket") || q.includes("fusion")) {
-    if (!main) return "No active incident.";
-    if (main.ticket_ids.length === 0) return "No duplicate tickets were merged for the current incident.";
-    return `${main.ticket_ids.length} duplicate tickets merged: ${main.ticket_ids.join(", ")}.`;
-  }
-  if (DURATION_TOKENS.some((t) => q.includes(t))) {
-    if (!main) return "No active incident.";
-    return `The incident lasted ${pyFloatRepr(main.duration_minutes)} minutes, from ${main.start} to ${main.end}.`;
-  }
-  if (q.includes("customer") || q.includes("cliente")) {
-    if (!main) return "No active incident.";
-    const customers = affectedCustomers(main);
-    if (customers.length === 0) return "No affected customers are identified on the current incident.";
-    return `Affected customers: ${customers.join(", ")}.`;
-  }
-  if (SCOPE.test(qMatch)) return GENERIC_ANSWER;
-  return REFUSAL;
+}
+
+/** Answer one question about the current incident (the earliest one), in English like Python. */
+export function answerQuestion(question: unknown, events: readonly AlertEvent[], runbooks: readonly Runbook[]): string {
+  return answerTextEn(answerParts(question, events, runbooks));
 }

@@ -4,6 +4,8 @@
  *
  * Alarm text is data, never instructions: lines with HTML tags, script tags
  * or destructive shell commands are dropped and counted, never parsed.
+ * Lines with an impossible timestamp (month 13, 31-nov, 24:00, second 60)
+ * are dropped and counted too, so correlate() never fails on imported data.
  */
 import {
   PyFloat,
@@ -18,6 +20,7 @@ import {
   pyStrip,
   utf8Length,
 } from "./py";
+import { TimestampError, parseTimestamp } from "./correlator";
 import type { AlertEvent, MetricValue } from "./types";
 
 export const MAX_IMPORT_BYTES = 1024 * 1024;
@@ -47,7 +50,7 @@ export const SYSLOG_TYPES: Record<string, string> = {
 
 export interface ParseResult {
   events: AlertEvent[];
-  /** Lines that were ignored: suspicious, malformed or of an unknown type. */
+  /** Lines that were ignored: suspicious, malformed, of an unknown type or with an impossible timestamp. */
   invalid: number;
 }
 
@@ -55,6 +58,17 @@ export interface ParseResult {
 function parseValue(raw: string): MetricValue {
   const parsed = /[.eE]/.test(raw) ? pyParseFloat(raw) : pyParseInt(raw);
   return parsed === undefined ? raw : parsed;
+}
+
+/** Python: _parse_ts(timestamp) does not raise ValueError. */
+function isValidTimestamp(ts: string): boolean {
+  try {
+    parseTimestamp(ts);
+    return true;
+  } catch (err) {
+    if (err instanceof TimestampError) return false;
+    throw err;
+  }
 }
 
 /** Python: isinstance(value, (int, float)) and value >= threshold. */
@@ -87,6 +101,10 @@ export function parseSyslogText(text: string, existingCount = 0): ParseResult {
     const [, timestamp, device, code, iface, metricName, rawValue, message] = match;
     const alertType = SYSLOG_TYPES[code];
     if (!alertType) {
+      invalid++;
+      continue;
+    }
+    if (!isValidTimestamp(timestamp)) {
       invalid++;
       continue;
     }

@@ -19,8 +19,9 @@ POST /voice/query answers only the current NOC incident and never treats the
 question as instructions. A question longer than 500 characters gets a clear
 too-long message and is not truncated or answered. POST /alerts/import
 rejects text over 1 MB, more than 5000 lines, or any line over 4096
-characters. HTML tags, script tags, and destructive shell commands are
-ignored and counted, never stored as events. POST /voice/audio calls ElevenLabs when
+characters. HTML tags, script tags, destructive shell commands and
+impossible timestamps (e.g. month 13) are ignored and counted, never stored
+as events. POST /voice/audio calls ElevenLabs when
 ELEVENLABS_API_KEY is set, caches the most recent clips, and does not call
 out again for a repeated line. It returns 503 when ElevenLabs is not
 configured and 502 when speech generation fails. POST /voice/transcribe
@@ -44,6 +45,7 @@ from urllib.parse import urlparse
 sys.path.insert(0, __file__.rsplit("/", 1)[0])
 
 from correlator import (  # noqa: E402
+    _parse_ts,
     affected_customers,
     correlate,
     peak_packet_loss,
@@ -139,6 +141,13 @@ def parse_syslog_text(text):
         timestamp, device, code, interface, metric_name, raw_value, message = match.groups()
         alert_type = SYSLOG_TYPES.get(code)
         if not alert_type:
+            invalid += 1
+            continue
+        try:
+            # An impossible date (month 13, 31-nov, 24:00, second 60) would
+            # break correlate() for every later request: ignore the line.
+            _parse_ts(timestamp)
+        except ValueError:
             invalid += 1
             continue
         try:

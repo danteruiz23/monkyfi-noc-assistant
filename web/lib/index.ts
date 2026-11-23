@@ -27,4 +27,14 @@ export {
   type ImportResult,
   type ParseResult,
 } from "./syslog";
-export { GENERIC_ANSWER, MAX_QUESTION_CHARS, REFUSAL, TOO_LONG_ANSWER, answerQuestion } from "./answers";
+export {
+  GENERIC_ANSWER,
+  MAX_QUESTION_CHARS,
+  REFUSAL,
+  TOO_LONG_ANSWER,
+  answerParts,
+  answerQuestion,
+  answerTextEn,
+  type AnswerParts,
+  type AnswerTopic,
+} from "./answers";

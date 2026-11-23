@@ -10,6 +10,7 @@ import { logicText, type Lang, type StringKey } from "./i18n";
 import { pyCompare, pyFloatRepr, pySortedUnique, pyStr } from "./py";
 import { draftSummary } from "./summarizer";
 import { suggestionText } from "./remediation";
+import { answerTextEn, type AnswerParts } from "./answers";
 import type { AlertEvent, Incident, Suggestion } from "./types";
 
 /* ---------------------------------------------------------------- labels */
@@ -285,4 +286,50 @@ export function closureSummary(incident: Incident, suggestions: readonly Suggest
 export function mttrSaving(before: number, after: number): number {
   if (!(before > 0)) return 0;
   return Math.round(((before - after) / before) * 100);
+}
+
+/* --------------------------------------------------------------- answers */
+
+const GENERIC_ES =
+  "Puedo responder: qué enlaces están saturados, la causa probable, el impacto, " +
+  "qué tickets se fusionaron, cuánto duró el incidente o qué clientes están afectados.";
+
+/**
+ * The answer to a question in the chosen language. English is answerTextEn()
+ * (the Python backend's exact text); Spanish states the same facts.
+ */
+export function answerText(parts: AnswerParts, lang: Lang): string {
+  if (lang === "en") return answerTextEn(parts);
+  if (parts.kind === "generic") return GENERIC_ES;
+  if (parts.kind === "too_long") return "Esta pregunta es demasiado larga (máximo 500 caracteres).";
+  if (parts.kind === "refusal") return "Lo siento, solo puedo responder preguntas sobre el incidente actual del NOC.";
+  const main = parts.incident;
+  switch (parts.kind) {
+    case "saturation":
+      if (!main) return "No hay alertas de saturación en este momento.";
+      return `El uplink Te0/0/0/0 de MIA-EDGE-02 llegó a un máximo de ${pyStr(peakUtilization(main))}% de utilización.`;
+    case "cause":
+      if (!main) return "No hay un incidente activo para diagnosticar.";
+      return remediationText(main, parts.suggestions, lang);
+    case "impact":
+      if (!main) return "No hay un incidente activo.";
+      return (
+        `${main.event_count} alertas se correlacionaron en un solo incidente. ` +
+        `Pérdida máxima de paquetes ${pyStr(peakPacketLoss(main))}%, ` +
+        `${main.ticket_ids.length} tickets duplicados fusionados.`
+      );
+    case "tickets":
+      if (!main) return "No hay un incidente activo.";
+      if (main.ticket_ids.length === 0) return "No se fusionaron tickets duplicados en el incidente actual.";
+      return `${main.ticket_ids.length} tickets duplicados fusionados: ${main.ticket_ids.join(", ")}.`;
+    case "duration":
+      if (!main) return "No hay un incidente activo.";
+      return `El incidente duró ${pyFloatRepr(main.duration_minutes)} minutos, de ${main.start} a ${main.end}.`;
+    case "customers": {
+      if (!main) return "No hay un incidente activo.";
+      const customers = affectedCustomers(main);
+      if (customers.length === 0) return "No hay clientes afectados identificados en el incidente actual.";
+      return `Clientes afectados: ${customers.join(", ")}.`;
+    }
+  }
 }

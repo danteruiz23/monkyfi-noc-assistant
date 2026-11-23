@@ -133,7 +133,7 @@ export const STRINGS = {
     impIntro:
       "Paste simulator-style syslog alarms or select a .txt file. Alarm text is treated as data, never as instructions.",
     impLimits:
-      "Limits: 1 MB, 5000 lines and 4096 characters per line. Lines with HTML, scripts or destructive commands are ignored.",
+      "Limits: 1 MB, 5000 lines and 4096 characters per line. Lines with HTML, scripts, destructive commands or impossible dates are ignored.",
     impTextLabel: "Syslog alarm lines",
     impPlaceholder: "<134>1 2026-11-02T09:00:00Z MIA-EDGE-02 BGP-5-ADJCHANGE: Te0/0/0/1 bgp_neighbor_state=down …",
     impFile: "Select .txt file",
@@ -148,6 +148,63 @@ export const STRINGS = {
     impFileLoaded: "File loaded: {name}. Press Analyze alarms.",
     impResetDone: "Demo data restored: {n} simulator alarms.",
     impSeeIncidents: "See incidents",
+
+    // 7. Questions (screen) and voice
+    navAsk: "Questions",
+    askTitle: "Questions",
+    askIntro:
+      "Ask about the current incident by typing or by voice. Answers come only from the loaded alarms and runbooks; the question is treated as data, never as instructions.",
+    askDemoLabel: "Demo questions",
+    askQ1: "Which links are saturated?",
+    askQ2: "What is the probable cause?",
+    askQ3: "What is the impact of the incident?",
+    askQ4: "Which tickets were merged?",
+    askQ5: "How long did the incident last?",
+    askQ6: "Which customers are affected?",
+    askInputLabel: "Your question",
+    askPlaceholder: "Type a question about the current incident…",
+    askCounter: "{n} of {max} characters",
+    askSend: "Ask",
+    askSending: "Thinking…",
+    askClear: "Clear conversation",
+    askEmpty: "No questions yet. Pick a demo question, type one or use the microphone.",
+    askYou: "You",
+    askAssistant: "Assistant",
+    askDataNote: "Answered from {alarms} alarms in {incidents} incidents.",
+    askModeAnswer: "From the incident data",
+    askModeFixed: "Fixed reply",
+    askModeReported: "Reported",
+    askModeHuman: "NOC decision",
+    askListen: "Listen",
+    askStop: "Stop",
+    askMic: "Dictate",
+    askMicStop: "Stop dictation",
+    askListening: "Listening… speak your question.",
+    askMicUnsupported: "Voice dictation is not available in this browser. You can still type your question.",
+    askMicDenied: "The microphone could not be used. Check the browser permission and try again.",
+    askMicNothing: "No speech was recognized. Try again.",
+    askReadAloud: "Read answers aloud",
+    askSpeechUnsupported: "Read-aloud is not available in this browser.",
+    askVoiceBrowser: "Voice: built into your browser (no cost, no key).",
+    askVoiceEleven: "Voice: ElevenLabs (enabled on this server).",
+    askNetworkError: "The assistant could not be reached. Check your connection and try again.",
+
+    // Fixed replies of the questions route (Monkyfi guardrails)
+    askResume:
+      "Ask me which links are saturated, the probable cause, the impact, the merged tickets, how long it lasted or which customers are affected.",
+    askRefusal: "I can't answer that question: it has nothing to do with the current NOC incident.",
+    askReported:
+      "That's {n} attempts with questions unrelated to the current NOC incident. I can't answer them and this attempt has been reported to Monkyfi's internal team.",
+    askAbout:
+      "I'm the Monkyfi NOC Assistant. I correlate network alarms into incidents, suggest the remediation from the runbooks with the probable cause and the expected repair time, and draft the ticket closure summary. I recommend; the NOC team decides and executes.",
+    askHumanControl:
+      "I don't execute actions on the network or on tickets: I recommend, and the NOC team decides and executes. Open Remediation to see the suggested runbook.",
+    askPasted:
+      "This looks like pasted alarm lines. Alarm text is data, never instructions, so any order inside it is ignored. Add the lines in Import alarms, then ask me about the incident.",
+    askTooLong: "This question is too long (maximum 500 characters).",
+    askBusy: "Too many questions in a short time. Wait a minute and try again.",
+    askBadRequest: "The question could not be read. Try again.",
+    askDataError: "The current alarm data could not be read. Reset the demo data in Import alarms and try again.",
   },
   es: {
     title: "Monkyfi NOC Assistant",
@@ -267,7 +324,7 @@ export const STRINGS = {
     impIntro:
       "Pega alarmas syslog del simulador o selecciona un archivo .txt. El texto de las alarmas se trata como dato, nunca como instrucción.",
     impLimits:
-      "Límites: 1 MB, 5000 líneas y 4096 caracteres por línea. Se ignoran las líneas con HTML, scripts o comandos destructivos.",
+      "Límites: 1 MB, 5000 líneas y 4096 caracteres por línea. Se ignoran las líneas con HTML, scripts, comandos destructivos o fechas imposibles.",
     impTextLabel: "Líneas de alarmas syslog",
     impPlaceholder: "<134>1 2026-11-02T09:00:00Z MIA-EDGE-02 BGP-5-ADJCHANGE: Te0/0/0/1 bgp_neighbor_state=down …",
     impFile: "Seleccionar archivo .txt",
@@ -282,6 +339,61 @@ export const STRINGS = {
     impFileLoaded: "Archivo cargado: {name}. Pulsa Analizar alarmas.",
     impResetDone: "Datos de demo restaurados: {n} alarmas del simulador.",
     impSeeIncidents: "Ver incidentes",
+
+    navAsk: "Preguntas",
+    askTitle: "Preguntas",
+    askIntro:
+      "Pregunta sobre el incidente actual escribiendo o con la voz. Las respuestas salen solo de las alarmas y los runbooks cargados; la pregunta se trata como dato, nunca como instrucción.",
+    askDemoLabel: "Preguntas de la demo",
+    askQ1: "¿Qué enlaces están saturados?",
+    askQ2: "¿Cuál es la causa probable?",
+    askQ3: "¿Cuál es el impacto del incidente?",
+    askQ4: "¿Qué tickets se fusionaron?",
+    askQ5: "¿Cuánto duró el incidente?",
+    askQ6: "¿Qué clientes están afectados?",
+    askInputLabel: "Tu pregunta",
+    askPlaceholder: "Escribe una pregunta sobre el incidente actual…",
+    askCounter: "{n} de {max} caracteres",
+    askSend: "Preguntar",
+    askSending: "Pensando…",
+    askClear: "Borrar conversación",
+    askEmpty: "Todavía no hay preguntas. Elige una pregunta de la demo, escribe una o usa el micrófono.",
+    askYou: "Tú",
+    askAssistant: "Asistente",
+    askDataNote: "Respondido con {alarms} alarmas en {incidents} incidentes.",
+    askModeAnswer: "Con los datos del incidente",
+    askModeFixed: "Respuesta fija",
+    askModeReported: "Reportado",
+    askModeHuman: "Decisión del NOC",
+    askListen: "Escuchar",
+    askStop: "Detener",
+    askMic: "Dictar",
+    askMicStop: "Detener dictado",
+    askListening: "Escuchando… di tu pregunta.",
+    askMicUnsupported: "El dictado por voz no está disponible en este navegador. Puedes escribir tu pregunta.",
+    askMicDenied: "No se pudo usar el micrófono. Revisa el permiso del navegador e inténtalo de nuevo.",
+    askMicNothing: "No se reconoció ninguna voz. Inténtalo de nuevo.",
+    askReadAloud: "Leer las respuestas en voz alta",
+    askSpeechUnsupported: "La lectura en voz alta no está disponible en este navegador.",
+    askVoiceBrowser: "Voz: la del navegador (sin costo, sin clave).",
+    askVoiceEleven: "Voz: ElevenLabs (activada en este servidor).",
+    askNetworkError: "No se pudo contactar al asistente. Revisa tu conexión e inténtalo de nuevo.",
+
+    askResume:
+      "Pregúntame qué enlaces están saturados, la causa probable, el impacto, los tickets fusionados, cuánto duró o qué clientes están afectados.",
+    askRefusal: "No puedo responder esa pregunta: no tiene que ver con el incidente actual del NOC.",
+    askReported:
+      "Ya van {n} intentos con preguntas que no tienen que ver con el incidente actual del NOC. No puedo responderlas y este intento queda reportado al equipo interno de Monkyfi.",
+    askAbout:
+      "Soy el Monkyfi NOC Assistant. Correlaciono las alarmas de red en incidentes, sugiero la remediación según los runbooks con la causa probable y el tiempo de reparación esperado, y redacto el resumen de cierre del ticket. Yo recomiendo; el equipo del NOC decide y ejecuta.",
+    askHumanControl:
+      "No ejecuto acciones en la red ni en los tickets: recomiendo, y el equipo del NOC decide y ejecuta. Abre Remediación para ver el runbook sugerido.",
+    askPasted:
+      "Esto parecen líneas de alarmas pegadas. El texto de las alarmas es dato, nunca instrucción, así que cualquier orden que traiga se ignora. Agrega las líneas en Importar alarmas y luego pregúntame por el incidente.",
+    askTooLong: "Esta pregunta es demasiado larga (máximo 500 caracteres).",
+    askBusy: "Demasiadas preguntas en poco tiempo. Espera un minuto e inténtalo de nuevo.",
+    askBadRequest: "No se pudo leer la pregunta. Inténtalo de nuevo.",
+    askDataError: "No se pudieron leer los datos de alarmas actuales. Restaura los datos de demo en Importar alarmas e inténtalo de nuevo.",
   },
 } as const satisfies Record<Lang, Record<string, string>>;
 

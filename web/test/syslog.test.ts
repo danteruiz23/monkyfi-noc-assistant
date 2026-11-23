@@ -27,6 +27,26 @@ describe("syslog parsing matches Python", () => {
     );
   });
 
+  it.each((parse.timestamps as any[]).map((c) => [c.timestamp as string, c] as [string, any]))(
+    "timestamp %s is kept or ignored like Python",
+    (ts: string, c: any) => {
+      const line = `<134>1 ${ts} MIA-EDGE-02 LINK-4-UTILIZATION: Te0/0/0/0 link_utilization_pct=97 Uplink utilization at threshold`;
+      const out = parseSyslogText(`${line}\n${line.replace("97", "81")}`);
+      expect(out.invalid).toBe(c.invalid);
+      expect(tag(out.events)).toEqual(c.events);
+    },
+  );
+
+  it("impossible timestamps are ignored and counted, never stored", () => {
+    const bad = parse.timestamps.filter((c: any) => c.events.length === 0).map((c: any) => c.timestamp);
+    expect(bad).toEqual(expect.arrayContaining(["2026-13-04T02:00:30Z", "2026-11-31T02:00:30Z", "2026-11-04T24:00:00Z"]));
+    const good = "<134>1 2026-11-04T02:00:30Z MIA-EDGE-02 BGP-5-ADJCHANGE: Te0/0/0/0 bgp_neighbor_state=down BGP neighbor down";
+    const result = importAlarmText(`${good}\n${good.replace("2026-11-04", "2026-13-04")}`);
+    expect(result).toMatchObject({ ok: true, imported: 1, ignored: 1 });
+    const onlyBad = importAlarmText(good.replace("2026-11-04", "2026-13-04"));
+    expect(onlyBad.ok).toBe(false);
+  });
+
   it("the syslog version of the demo gives the same main incident", () => {
     const bundle = incidentBundle(parseSyslogText(dataText("syslog.txt")).events, runbooks());
     const main = bundle.incidents![0].incident as any;
@@ -48,7 +68,10 @@ describe(`random syslog corpus (${fuzz.length} cases) matches Python`, () => {
   });
 
   it("covers suspicious lines, bad timestamps and floats", () => {
-    expect(fuzz.some((c) => c.pipeline && "error" in c.pipeline)).toBe(true);
+    // Phase 3: lines with impossible timestamps are ignored at import, so no
+    // imported block can break correlation any more (Python and TS alike).
+    expect(fuzz.some((c) => /T24:|-13-|:60Z|-11-31T/.test(c.text))).toBe(true);
+    expect(fuzz.every((c) => !(c.pipeline && "error" in c.pipeline))).toBe(true);
     expect(fuzz.some((c) => c.invalid > 0)).toBe(true);
     expect(JSON.stringify(fuzz)).toContain('"$float"');
   });
