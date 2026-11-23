@@ -10,6 +10,7 @@ import IncidentDetail from "./screens/IncidentDetail";
 import Remediation from "./screens/Remediation";
 import ClosureSummary from "./screens/ClosureSummary";
 import ImportAlarms, { type ImportStatus } from "./screens/ImportAlarms";
+import AskQuestions, { type AskRequest, type ChatTurn } from "./screens/AskQuestions";
 
 /** Raw data text from web/data/, parsed in the browser with parsePyJson (keeps 12.0 a float). */
 export interface DemoData {
@@ -18,7 +19,7 @@ export interface DemoData {
   sampleSyslog: string;
 }
 
-export const SCREENS = ["incidents", "replay", "detail", "remediation", "summary", "import"] as const;
+export const SCREENS = ["incidents", "replay", "detail", "remediation", "summary", "import", "ask"] as const;
 export type Screen = (typeof SCREENS)[number];
 
 const NAV_KEYS: Record<Screen, StringKey> = {
@@ -28,6 +29,7 @@ const NAV_KEYS: Record<Screen, StringKey> = {
   remediation: "navRemediation",
   summary: "navSummary",
   import: "navImport",
+  ask: "navAsk",
 };
 
 export type ReplayStatus = "idle" | "playing" | "paused" | "done";
@@ -60,6 +62,8 @@ export default function NocApp({ data }: { data: DemoData }) {
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [importText, setImportText] = useState("");
   const [importStatus, setImportStatus] = useState<ImportStatus | null>(null);
+  const [chat, setChat] = useState<ChatTurn[]>([]);
+  const [askDraft, setAskDraft] = useState("");
 
   // Language: remembered per browser; storage can be blocked, English stays the default.
   useEffect(() => {
@@ -128,6 +132,16 @@ export default function NocApp({ data }: { data: DemoData }) {
 
   const incidents = useMemo(() => correlate(events), [events]);
   const selected = incidents.find((i) => i.id === selectedId) ?? incidents[0] ?? null;
+
+  // What the questions route needs to rebuild the alarms on screen: how many
+  // demo alarms (the live replay shows a prefix) and the imported syslog lines.
+  const askData = useMemo<AskRequest["data"]>(() => {
+    const imported = events.filter((e) => e.source === "syslog-import");
+    return {
+      demo: events.length - imported.length,
+      imported: imported.map((e) => e.syslog ?? "").join("\n"),
+    };
+  }, [events]);
 
   const addEvents = (added: AlertEvent[]) => {
     // An import ends any replay in progress, so the replay cannot overwrite it.
@@ -251,6 +265,16 @@ export default function NocApp({ data }: { data: DemoData }) {
             setStatus={setImportStatus}
             onImport={addEvents}
             onReset={resetDemo}
+          />
+        )}
+        {screen === "ask" && (
+          <AskQuestions
+            {...common}
+            data={askData}
+            chat={chat}
+            setChat={(update) => setChat(update)}
+            draft={askDraft}
+            setDraft={setAskDraft}
           />
         )}
       </main>

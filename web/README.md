@@ -4,16 +4,18 @@ Next.js (TypeScript) version of the NOC Assistant for the public demo link.
 It uses **synthetic data only** and needs **no AI key and no ElevenLabs key**.
 See `../docs/SPEC.md` for the plan (Block A, phases 1–4).
 
-> Status: **phase 2** — screens 1–6 in EN/ES with a live replay, built on the
-> deterministic logic ported in phase 1 (checked against Python). Questions, voice
-> and guardrails (screen 7) arrive in phase 3; the guided demo and deploy in phase 4.
+> Status: **phase 3** — screens 1–7 in EN/ES: live replay, questions with
+> browser voice, and the Monkyfi guardrails on a server route. Built on the
+> deterministic logic ported in phase 1 (checked against Python). The guided
+> demo and the deploy arrive in phase 4.
 
 ## Screens
 
-The page is static (`/`, prerendered at build time). All logic runs in the
-browser from the synthetic data in `data/`: no server calls, no keys.
+The page is static (`/`, prerendered at build time). Screens 1–6 run the
+logic in the browser from the synthetic data in `data/`. Screen 7 asks the
+server route `POST /api/ask`, which applies the guardrails. No keys are needed.
 Each screen has a link: `/#incidents`, `/#replay`, `/#detail`, `/#remediation`,
-`/#summary`, `/#import`.
+`/#summary`, `/#import`, `/#ask`.
 
 | # | Screen | What it shows |
 |---|---|---|
@@ -22,7 +24,34 @@ Each screen has a link: `/#incidents`, `/#replay`, `/#detail`, `/#remediation`,
 | 3 | Incident detail | Probable cause, window, peaks, causal chain, affected customers, merged tickets and full timeline. |
 | 4 | Remediation | Top runbook and an alternative, matched keywords, MTTR before/after; always "Recommendation: requires a NOC decision". |
 | 5 | Closure summary | Editable draft (per incident and language), copy, export `.txt`, restore. |
-| 6 | Import alarms | Paste or pick a `.txt` (same limits and filters as the backend); sample file; reset to demo data. |
+| 6 | Import alarms | Paste or pick a `.txt` (same limits and filters as the backend; lines with an impossible date are ignored); sample file; reset to demo data. |
+| 7 | Questions | Six demo questions, a text box, browser dictation and read-aloud; answers in EN/ES from the alarms on screen; fixed replies for anything else. |
+
+## Questions, voice and guardrails (phase 3)
+
+- `POST /api/ask` `{ question, lang, data: { demo, imported } }` rebuilds the
+  alarms the browser shows (replay prefix + imported syslog lines, re-parsed with
+  the same limits) and answers from them. English answers are the parity-tested
+  text (`answerQuestion()`); Spanish states the same facts (`lib/localize.ts`).
+- **Guardrails** (`lib/guardrails.ts`, Monkyfi standard): each question is
+  classified (`on_topic`, `off_topic`, `about_agent`, `manipulation`) before any
+  answer. Off-topic and manipulation get a fixed text that never lists rules;
+  each one is a strike, logged with a redacted excerpt and a hashed client id;
+  from the 3rd strike the reply says it was reported and the log line is a
+  `guardrail_report`. "What can you do?" is not a strike. Commands ("reboot
+  MIA-EDGE-02") get the human-control text: the assistant recommends, the NOC
+  decides. Pasted alarm lines are data, never obeyed and never a strike.
+- **Limits**: 500 characters per question, 1 MB + 64 KB per request, 20
+  questions per minute and 300 per hour per client, same-origin only. Counts are
+  in memory, so on serverless hosting they are per instance (best effort).
+- **Voice**: dictation (`SpeechRecognition`) and read-aloud (`speechSynthesis`)
+  are the browser's own, with no cost and no key. Where the browser has no
+  dictation (e.g. Firefox), the screen says so and typing still works.
+- **ElevenLabs (optional)**: off unless `VOICE_PROVIDER=elevenlabs` **and**
+  `ELEVENLABS_API_KEY` are set on the server (see `.env.example`). Then
+  `POST /api/tts` speaks the assistant's own answer (rebuilt from the
+  question, never arbitrary text), with a 10-per-minute limit and a cache;
+  refusals are not sent to ElevenLabs. If it fails, the browser voice reads.
 
 Languages: the EN/ES toggle is remembered in the browser. English texts that
 come from the logic (titles, summary, remediation) are exactly the
@@ -53,10 +82,14 @@ of a *new* package with npm 10.9 can crash on Vitest's peer dependencies
 | `lib/i18n.ts` | Every visible text, EN and ES, plus Spanish for the fixed logic texts (causes, runbooks, import errors). |
 | `lib/localize.ts` | Spanish views of the logic output: alarm messages, incident titles, causal chain, closure summary. |
 | `lib/replay.ts` | Live replay order and timing. |
+| `lib/guardrails.ts` | Question classification, fixed replies, strike counter, rate limiter, redacted log lines. |
+| `lib/voice.ts` | Browser dictation and read-aloud helpers. |
+| `lib/server/` | Server-only: `ask.ts` (`/api/ask`), `tts.ts` (optional ElevenLabs), `http.ts` (origin, size, client key). |
+| `app/api/` | Route files for `/api/ask` and `/api/tts`. |
 | `components/` | `NocApp.tsx` (state, navigation, replay timer) and one file per screen in `screens/`. |
 | `data/` | Copies of `../data/` (a test checks they stay identical). |
 | `scripts/generate_fixtures.py` | Runs the real Python backend and writes `test/fixtures/`. |
-| `test/` | Parity tests (TypeScript output must equal the Python output) and `i18n.test.ts` (EN/ES coverage, no hard-coded text in components, replay). |
+| `test/` | Parity tests (TypeScript output must equal the Python output), `i18n.test.ts` (EN/ES coverage, no hard-coded text in components, replay) and `guardrails.test.ts` with the battery in `guardrail-probes.ts` (71 probes × EN/ES, 5 multi-turn sequences, route, limits, log, ElevenLabs mocked). |
 
 ## Parity with Python
 

@@ -255,6 +255,16 @@ def random_syslog_block(rng):
     return text
 
 
+IMPORT_TIMESTAMPS = [
+    "2026-11-04T02:00:30Z", "2024-02-29T12:00:00Z", "2026-13-04T02:00:30Z",
+    "2026-00-04T02:00:30Z", "2026-11-31T02:00:30Z", "2026-04-31T00:00:00Z",
+    "2025-02-29T00:00:00Z", "2026-11-04T24:00:00Z", "2026-11-04T02:60:00Z",
+    "2026-11-04T02:00:60Z", "2026-11-04T02:00:61Z", "0000-01-01T00:00:00Z",
+    "0001-01-01T00:00:00Z", "9999-12-31T23:59:59Z", "٢٠٢٦-11-04T02:00:30Z",
+    "2026-١٣-04T02:00:30Z",
+]
+
+
 # ----------------------------------------------------------- import limits
 
 def build_text(recipe):
@@ -314,6 +324,13 @@ def main():
     app.EVENTS[:] = []
     syslog_events, _ = app.parse_syslog_text(syslog_txt)
     demo_events, _ = app.parse_syslog_text(demo_txt)
+    # Impossible timestamps are ignored at import (phase 3), so correlate() never fails on them.
+    parse_fixture["timestamps"] = []
+    for ts in IMPORT_TIMESTAMPS:
+        line = (f"<134>1 {ts} MIA-EDGE-02 LINK-4-UTILIZATION: Te0/0/0/0 "
+                f"link_utilization_pct=97 Uplink utilization at threshold")
+        events, invalid = app.parse_syslog_text(line + "\n" + line.replace("97", "81"))
+        parse_fixture["timestamps"].append({"timestamp": ts, "events": events, "invalid": invalid})
     parse_fixture["pipeline"] = {
         "syslog.txt": incident_bundle(syslog_events, runbooks),
         "alarmas-demo.txt": incident_bundle(demo_events, runbooks),

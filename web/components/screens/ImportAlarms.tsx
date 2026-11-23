@@ -86,8 +86,8 @@ export default function ImportAlarms({
     const next = [...events, ...result.events];
     let incidents: number;
     try {
-      // A line with an impossible date (e.g. month 13) passes the syslog pattern
-      // but cannot be correlated; refuse the whole import instead of breaking the page.
+      // Defence in depth: the parser already ignores lines with an impossible
+      // date (phase 3), but never let a correlation error break the page.
       incidents = correlate(next).length;
     } catch {
       setStatus({ kind: "error", key: "impBadDate" });
