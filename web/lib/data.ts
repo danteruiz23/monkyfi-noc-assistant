@@ -25,3 +25,15 @@ export function loadRunbooks(): Runbook[] {
 export function loadSyslogDemo(): string {
   return readData("alarmas-demo.txt");
 }
+
+/**
+ * The raw data text for the browser. It is parsed there with parsePyJson,
+ * because plain JSON.parse would turn 12.0 into 12 and break the Python parity.
+ */
+export function loadRawData(): { alertsJson: string; runbooksJson: string; sampleSyslog: string } {
+  return {
+    alertsJson: readData("alerts.json"),
+    runbooksJson: readData("runbooks.json"),
+    sampleSyslog: loadSyslogDemo(),
+  };
+}

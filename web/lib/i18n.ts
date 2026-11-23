@@ -1,6 +1,7 @@
 /**
  * Every visible text in the web demo, in English and Spanish.
- * Phase 2 adds the screen texts here; no visible string lives outside this file.
+ * No visible string lives outside this file (test/i18n.test.ts checks it).
+ * Placeholders such as {n} are filled with fmt().
  */
 export type Lang = "en" | "es";
 export const LANGS: Lang[] = ["en", "es"];
@@ -8,52 +9,380 @@ export const LANGS: Lang[] = ["en", "es"];
 export const STRINGS = {
   en: {
     title: "Monkyfi NOC Assistant",
+    brand: "Monkyfi",
+    product: "NOC Assistant",
     tagline: "Turns a flood of network alarms into one incident, with cause, remediation and closure.",
-    status: "Phase 1: deterministic logic ported from Python. The demo screens arrive in phase 2.",
-    mainIncident: "Main incident (synthetic demo data)",
-    events: "Correlated alarms",
-    duration: "Duration",
-    minutes: "min",
-    tickets: "Duplicate tickets merged",
-    incidents: "Incidents found",
-    probableCause: "Probable cause",
-    runbook: "Suggested runbook",
-    recommendation: "Recommendation: requires a NOC decision",
-    footer: "Demo with synthetic data. Not connected to real networks.",
     language: "Language",
+    footer: "Demo with synthetic data. Not connected to real networks.",
+    recommendation: "Recommendation: requires a NOC decision",
+    humanControl: "The assistant recommends; the NOC team decides and executes.",
+    minutes: "min",
+    utc: "UTC",
+    none: "None",
+    noneReported: "None reported",
+    noIncident: "No incident to show yet. Start the live replay or import alarms.",
+    goReplay: "Go to live replay",
+    replayBanner: "Live replay in progress: {n} of {total} alarms received.",
+
+    // Navigation
+    navLabel: "Screens",
+    navIncidents: "Incidents",
+    navReplay: "Live replay",
+    navDetail: "Incident detail",
+    navRemediation: "Remediation",
+    navSummary: "Closure summary",
+    navImport: "Import alarms",
+
+    // Severities and alarm types
+    sevCritical: "Critical",
+    sevMajor: "Major",
+    sevMinor: "Minor",
+    typeBgpFlap: "BGP flap",
+    typeLinkSaturation: "Link saturation",
+    typePacketLoss: "Packet loss",
+    typeOptical: "Optical degradation",
+    typeTicketCreated: "Ticket opened",
+    typeTicketUpdated: "Ticket updated",
+    typeTicket: "Ticket",
+
+    // 1. Incident panel
+    panelTitle: "Incident panel",
+    panelIntro: "Every alarm in the current data set, correlated into incidents.",
+    statAlarms: "Alarms received",
+    statIncidents: "Incidents",
+    statTickets: "Tickets received",
+    statNoise: "Alarms per incident",
+    colSeverity: "Severity",
+    colDevices: "Devices",
+    colDuration: "Duration",
+    colAlarms: "Alarms",
+    colTickets: "Tickets",
+    colStart: "Start (UTC)",
+    openDetail: "Open detail",
+    emptyPanel: "No alarms yet. Start the live replay or import alarms.",
+
+    // 2. Live replay
+    replayTitle: "Live replay",
+    replayIntro:
+      "Plays the 50 simulator alarms in your browser, sped up, so you can watch the incident form. Imported alarms are cleared when the replay starts.",
+    play: "Play",
+    pause: "Pause",
+    resume: "Resume",
+    restart: "Restart",
+    speed: "Speed",
+    speedOption: "{n}× faster",
+    progress: "{n} of {total} alarms",
+    simClock: "Network time (UTC)",
+    replayIdle: "Press Play to start the replay.",
+    replayPaused: "Replay paused.",
+    replayDone: "Replay finished: {alarms} alarms became {incidents} incidents.",
+    liveFeed: "Live alarm feed",
+    liveIncidents: "Incidents forming",
+    feedEmpty: "No alarms received yet.",
+
+    // 3. Incident detail
+    detailTitle: "Incident detail",
+    selectIncident: "Incident",
+    probableCause: "Probable cause",
+    window: "Window (UTC)",
+    devices: "Devices",
+    duration: "Duration",
+    events: "Correlated alarms",
+    peakLoss: "Peak packet loss",
+    peakUtil: "Peak uplink utilization",
+    causalChain: "Causal chain",
+    chainNote: "Built from the first alarm of each type, in time order.",
+    chainImpact: "Customer impact",
+    customers: "Affected customers",
+    tickets: "Duplicate tickets merged",
+    ticketOpened: "Opened",
+    ticketUpdated: "Updated",
+    timeline: "Timeline",
+    timelineCount: "{n} alarms",
+
+    // 4. Remediation
+    remTitle: "Remediation",
+    remIntro: "Runbook suggestion from the loaded runbooks, matched by keywords in the alarms.",
+    runbook: "Suggested runbook",
+    alternative: "Alternative runbook",
+    symptom: "Symptom",
+    rootCause: "Root cause (runbook)",
+    action: "Recommended action",
+    matched: "Matched keywords",
+    score: "{n} of {total} keywords",
+    mttr: "MTTR (mean time to repair)",
+    mttrBefore: "Before",
+    mttrAfter: "With the assistant playbook",
+    mttrSaving: "{n}% faster",
+
+    // 5. Closure summary
+    sumTitle: "Closure summary",
+    sumIntro:
+      "Draft built only from the correlated timeline, peak metrics and the runbook suggestion. Edit it before you close the ticket.",
+    draftLabel: "Closure summary draft",
+    copy: "Copy",
+    copied: "Copied to the clipboard.",
+    copyFailed: "Could not copy. Select the text and copy it by hand.",
+    download: "Export .txt",
+    exported: "File exported.",
+    restore: "Restore draft",
+    edited: "Edited",
+
+    // 6. Import alarms
+    impTitle: "Import alarms",
+    impIntro:
+      "Paste simulator-style syslog alarms or select a .txt file. Alarm text is treated as data, never as instructions.",
+    impLimits:
+      "Limits: 1 MB, 5000 lines and 4096 characters per line. Lines with HTML, scripts or destructive commands are ignored.",
+    impTextLabel: "Syslog alarm lines",
+    impPlaceholder: "<134>1 2026-11-02T09:00:00Z MIA-EDGE-02 BGP-5-ADJCHANGE: Te0/0/0/1 bgp_neighbor_state=down …",
+    impFile: "Select .txt file",
+    impSample: "Load sample alarms",
+    impAnalyze: "Analyze alarms",
+    impReset: "Reset to demo data",
+    impDone: "Imported {n} alarm(s). Ignored lines: {m}.",
+    impResult: "The data set now has {alarms} alarms in {incidents} incidents.",
+    impBadFile: "Select a .txt file.",
+    impReadError: "Could not read the file.",
+    impBadDate: "A line has an impossible date or time. Nothing was imported.",
+    impFileLoaded: "File loaded: {name}. Press Analyze alarms.",
+    impResetDone: "Demo data restored: {n} simulator alarms.",
+    impSeeIncidents: "See incidents",
   },
   es: {
     title: "Monkyfi NOC Assistant",
+    brand: "Monkyfi",
+    product: "NOC Assistant",
     tagline: "Convierte una avalancha de alarmas de red en un solo incidente, con causa, remediación y cierre.",
-    status: "Fase 1: lógica determinista portada desde Python. Las pantallas de la demo llegan en la fase 2.",
-    mainIncident: "Incidente principal (datos sintéticos de demo)",
-    events: "Alarmas correlacionadas",
-    duration: "Duración",
-    minutes: "min",
-    tickets: "Tickets duplicados fusionados",
-    incidents: "Incidentes encontrados",
-    probableCause: "Causa probable",
-    runbook: "Runbook sugerido",
-    recommendation: "Recomendación: requiere decisión del NOC",
-    footer: "Demo con datos sintéticos. No conectada a redes reales.",
     language: "Idioma",
+    footer: "Demo con datos sintéticos. No conectada a redes reales.",
+    recommendation: "Recomendación: requiere decisión del NOC",
+    humanControl: "El asistente recomienda; el equipo del NOC decide y ejecuta.",
+    minutes: "min",
+    utc: "UTC",
+    none: "Ninguno",
+    noneReported: "Ninguno reportado",
+    noIncident: "Todavía no hay incidentes. Inicia la reproducción en vivo o importa alarmas.",
+    goReplay: "Ir a la reproducción en vivo",
+    replayBanner: "Reproducción en vivo en curso: {n} de {total} alarmas recibidas.",
+
+    navLabel: "Pantallas",
+    navIncidents: "Incidentes",
+    navReplay: "Reproducción en vivo",
+    navDetail: "Detalle del incidente",
+    navRemediation: "Remediación",
+    navSummary: "Resumen de cierre",
+    navImport: "Importar alarmas",
+
+    sevCritical: "Crítica",
+    sevMajor: "Mayor",
+    sevMinor: "Menor",
+    typeBgpFlap: "Flap de BGP",
+    typeLinkSaturation: "Saturación de enlace",
+    typePacketLoss: "Pérdida de paquetes",
+    typeOptical: "Degradación óptica",
+    typeTicketCreated: "Ticket abierto",
+    typeTicketUpdated: "Ticket actualizado",
+    typeTicket: "Ticket",
+
+    panelTitle: "Panel de incidentes",
+    panelIntro: "Todas las alarmas del conjunto actual, correlacionadas en incidentes.",
+    statAlarms: "Alarmas recibidas",
+    statIncidents: "Incidentes",
+    statTickets: "Tickets recibidos",
+    statNoise: "Alarmas por incidente",
+    colSeverity: "Severidad",
+    colDevices: "Equipos",
+    colDuration: "Duración",
+    colAlarms: "Alarmas",
+    colTickets: "Tickets",
+    colStart: "Inicio (UTC)",
+    openDetail: "Ver detalle",
+    emptyPanel: "Aún no hay alarmas. Inicia la reproducción en vivo o importa alarmas.",
+
+    replayTitle: "Reproducción en vivo",
+    replayIntro:
+      "Reproduce en tu navegador las 50 alarmas del simulador, aceleradas, para ver cómo se forma el incidente. Las alarmas importadas se borran al iniciar la reproducción.",
+    play: "Reproducir",
+    pause: "Pausar",
+    resume: "Continuar",
+    restart: "Reiniciar",
+    speed: "Velocidad",
+    speedOption: "{n}× más rápido",
+    progress: "{n} de {total} alarmas",
+    simClock: "Hora de la red (UTC)",
+    replayIdle: "Pulsa Reproducir para iniciar la reproducción.",
+    replayPaused: "Reproducción en pausa.",
+    replayDone: "Reproducción terminada: {alarms} alarmas se convirtieron en {incidents} incidentes.",
+    liveFeed: "Alarmas en vivo",
+    liveIncidents: "Incidentes en formación",
+    feedEmpty: "Todavía no llegan alarmas.",
+
+    detailTitle: "Detalle del incidente",
+    selectIncident: "Incidente",
+    probableCause: "Causa probable",
+    window: "Ventana (UTC)",
+    devices: "Equipos",
+    duration: "Duración",
+    events: "Alarmas correlacionadas",
+    peakLoss: "Pérdida de paquetes máxima",
+    peakUtil: "Utilización máxima del uplink",
+    causalChain: "Cadena causal",
+    chainNote: "Armada con la primera alarma de cada tipo, en orden de tiempo.",
+    chainImpact: "Impacto en clientes",
+    customers: "Clientes afectados",
+    tickets: "Tickets duplicados fusionados",
+    ticketOpened: "Abierto",
+    ticketUpdated: "Actualizado",
+    timeline: "Línea de tiempo",
+    timelineCount: "{n} alarmas",
+
+    remTitle: "Remediación",
+    remIntro: "Runbook sugerido entre los runbooks cargados, elegido por palabras clave de las alarmas.",
+    runbook: "Runbook sugerido",
+    alternative: "Runbook alternativo",
+    symptom: "Síntoma",
+    rootCause: "Causa raíz (runbook)",
+    action: "Acción recomendada",
+    matched: "Palabras clave encontradas",
+    score: "{n} de {total} palabras clave",
+    mttr: "MTTR (tiempo medio de reparación)",
+    mttrBefore: "Antes",
+    mttrAfter: "Con el playbook del asistente",
+    mttrSaving: "{n}% más rápido",
+
+    sumTitle: "Resumen de cierre",
+    sumIntro:
+      "Borrador armado solo con la línea de tiempo correlacionada, las métricas máximas y el runbook sugerido. Edítalo antes de cerrar el ticket.",
+    draftLabel: "Borrador del resumen de cierre",
+    copy: "Copiar",
+    copied: "Copiado al portapapeles.",
+    copyFailed: "No se pudo copiar. Selecciona el texto y cópialo a mano.",
+    download: "Exportar .txt",
+    exported: "Archivo exportado.",
+    restore: "Restaurar borrador",
+    edited: "Editado",
+
+    impTitle: "Importar alarmas",
+    impIntro:
+      "Pega alarmas syslog del simulador o selecciona un archivo .txt. El texto de las alarmas se trata como dato, nunca como instrucción.",
+    impLimits:
+      "Límites: 1 MB, 5000 líneas y 4096 caracteres por línea. Se ignoran las líneas con HTML, scripts o comandos destructivos.",
+    impTextLabel: "Líneas de alarmas syslog",
+    impPlaceholder: "<134>1 2026-11-02T09:00:00Z MIA-EDGE-02 BGP-5-ADJCHANGE: Te0/0/0/1 bgp_neighbor_state=down …",
+    impFile: "Seleccionar archivo .txt",
+    impSample: "Cargar alarmas de ejemplo",
+    impAnalyze: "Analizar alarmas",
+    impReset: "Volver a los datos de demo",
+    impDone: "Se importaron {n} alarma(s). Líneas ignoradas: {m}.",
+    impResult: "El conjunto de datos tiene ahora {alarms} alarmas en {incidents} incidentes.",
+    impBadFile: "Selecciona un archivo .txt.",
+    impReadError: "No se pudo leer el archivo.",
+    impBadDate: "Una línea tiene una fecha u hora imposible. No se importó nada.",
+    impFileLoaded: "Archivo cargado: {name}. Pulsa Analizar alarmas.",
+    impResetDone: "Datos de demo restaurados: {n} alarmas del simulador.",
+    impSeeIncidents: "Ver incidentes",
   },
 } as const satisfies Record<Lang, Record<string, string>>;
 
 export type StringKey = keyof (typeof STRINGS)["en"];
+export type Strings = Record<StringKey, string>;
+
+/** Fill {name} placeholders in a UI string. */
+export function fmt(template: string, vars: Record<string, string | number>): string {
+  return template.replace(/\{(\w+)\}/g, (whole, key: string) => (key in vars ? String(vars[key]) : whole));
+}
 
 /**
- * Spanish wording for the fixed texts the ported logic returns in English.
+ * Spanish wording for the fixed texts the ported logic returns in English
+ * (probable causes, runbook texts, import errors).
  * The logic itself stays English so it matches the Python backend exactly.
  */
 const LOGIC_ES: Record<string, string> = {
+  // Probable causes (lib/correlator.ts)
   "BGP neighbor flap on MIA-EDGE-02 (neighbor 198.51.100.2)":
     "Flap del vecino BGP en MIA-EDGE-02 (vecino 198.51.100.2)",
   "Degrading optic on DFW-CORE-01 Hu0/0/0/2": "Óptica degradándose en DFW-CORE-01 Hu0/0/0/2",
   "Unknown — see timeline": "Desconocida — ver la línea de tiempo",
+
+  // Import errors (lib/syslog.ts)
+  "paste syslog alarm lines or select a non-empty text file":
+    "Pega líneas de alarmas syslog o selecciona un archivo de texto que no esté vacío.",
+  "Alarm text is too large (maximum 1 MB).": "El texto de alarmas es demasiado grande (máximo 1 MB).",
+  "Alarm text has too many lines (maximum 5000).": "El texto de alarmas tiene demasiadas líneas (máximo 5000).",
+  "A syslog line is too long (maximum 4096 characters).":
+    "Una línea syslog es demasiado larga (máximo 4096 caracteres).",
+  "no supported syslog alarms found; expected simulator-style syslog lines":
+    "No se encontraron alarmas syslog compatibles; se esperan líneas syslog con el formato del simulador.",
+
+  // Runbooks (data/runbooks.json): symptom, root cause and action
+  "BGP neighbor flap after a config change on an edge router":
+    "Flap del vecino BGP después de un cambio de configuración en un router de borde",
+  "Faulty or untested BGP policy/config change caused session instability.":
+    "Un cambio de política o configuración BGP defectuoso o sin probar causó inestabilidad en la sesión.",
+  "Roll back the last BGP config change on the edge router, then clear the BGP session and verify prefix counts return to baseline.":
+    "Revertir el último cambio de configuración BGP en el router de borde, luego reiniciar la sesión BGP y verificar que la cantidad de prefijos vuelva a la línea base.",
+  "BGP neighbor flap with interface errors on the same link":
+    "Flap del vecino BGP con errores de interfaz en el mismo enlace",
+  "Degraded optic on the BGP peering link.": "Óptica degradada en el enlace de peering BGP.",
+  "Clean and reseat the optic; if errors persist, replace the optic and re-test the link.":
+    "Limpiar y reinsertar la óptica; si los errores siguen, reemplazar la óptica y volver a probar el enlace.",
+  "Uplink saturation after a traffic shift or failover":
+    "Saturación del uplink después de un cambio de tráfico o un failover",
+  "Traffic failed over onto a single uplink after a neighbor/link loss.":
+    "El tráfico pasó a un solo uplink después de perder un vecino o un enlace.",
+  "Shift traffic to the alternate uplink via BGP local-preference, and apply QoS policing to bulk traffic classes.":
+    "Mover el tráfico al uplink alterno con local-preference de BGP y aplicar policing de QoS a las clases de tráfico masivo.",
+  "Packet loss on downstream links following uplink saturation":
+    "Pérdida de paquetes en los enlaces aguas abajo tras la saturación del uplink",
+  "Congestion on the saturated uplink drops packets under load.":
+    "La congestión en el uplink saturado descarta paquetes bajo carga.",
+  "Reroute affected prefixes over the alternate path and confirm loss returns below 1% before closing.":
+    "Redirigir los prefijos afectados por la ruta alterna y confirmar que la pérdida baje de 1% antes de cerrar.",
+  "Optical Rx power steadily degrading on a core link":
+    "Potencia óptica Rx degradándose de forma constante en un enlace de core",
+  "Dirty or failing optic / bent fiber on the core link.":
+    "Óptica sucia o fallando, o fibra doblada, en el enlace de core.",
+  "Clean connectors, reseat the optic, and replace it if Rx power stays below -24 dBm.":
+    "Limpiar los conectores, reinsertar la óptica y reemplazarla si la potencia Rx sigue por debajo de -24 dBm.",
+  "Multiple tickets opened for the same outage by different tools and engineers":
+    "Varios tickets abiertos para la misma falla por distintas herramientas e ingenieros",
+  "Alert fatigue: several monitoring tools and engineers opened tickets for one incident.":
+    "Fatiga de alertas: varias herramientas de monitoreo e ingenieros abrieron tickets para un mismo incidente.",
+  "Merge duplicate tickets into the primary incident ticket and keep a single timeline for customer updates.":
+    "Fusionar los tickets duplicados en el ticket principal del incidente y mantener una sola línea de tiempo para informar a los clientes.",
+  "BGP drops correlated with high CPU on the edge router":
+    "Caídas de BGP correlacionadas con CPU alta en el router de borde",
+  "Control-plane overload starving the BGP process.":
+    "Sobrecarga del plano de control que deja sin recursos al proceso BGP.",
+  "Apply control-plane policing and rate-limit non-essential management traffic, then monitor CPU for 15 minutes.":
+    "Aplicar policing del plano de control y limitar el tráfico de gestión no esencial; luego vigilar la CPU durante 15 minutos.",
+  "Interface errors and flapping after a speed/duplex change":
+    "Errores y flapping de interfaz después de un cambio de velocidad o dúplex",
+  "Speed/duplex mismatch after a manual interface change.":
+    "Velocidad o dúplex desiguales después de un cambio manual en la interfaz.",
+  "Set both ends to auto-negotiation (or matching fixed speed/duplex) and clear interface counters.":
+    "Poner ambos extremos en autonegociación (o en la misma velocidad y dúplex fijos) y reiniciar los contadores de la interfaz.",
+  "Sudden uplink saturation from a single source prefix":
+    "Saturación repentina del uplink desde un solo prefijo de origen",
+  "Volumetric traffic flood (likely DDoS) toward one destination.":
+    "Avalancha de tráfico volumétrico (probable DDoS) hacia un solo destino.",
+  "Apply remotely-triggered blackholing (RTBH) for the target prefix or divert traffic to scrubbing.":
+    "Aplicar blackholing activado de forma remota (RTBH) para el prefijo atacado o desviar el tráfico a limpieza (scrubbing).",
+  "Line-card reset after a power or cooling alarm":
+    "Reinicio de una tarjeta de línea después de una alarma de energía o enfriamiento",
+  "Power supply or cooling failure resetting a line card.":
+    "Falla de la fuente de poder o del enfriamiento que reinicia una tarjeta de línea.",
+  "Reseat the line card, verify power feeds and airflow, and replace the faulty PSU if alarms repeat.":
+    "Reinsertar la tarjeta de línea, verificar la alimentación y el flujo de aire, y reemplazar la fuente (PSU) defectuosa si las alarmas se repiten.",
 };
 
 /** Show a fixed logic text in the chosen language (unknown text is shown as is). */
 export function logicText(text: string, lang: Lang): string {
   return lang === "es" ? (LOGIC_ES[text] ?? text) : text;
+}
+
+/** True when a Spanish wording exists for this logic text. */
+export function hasLogicText(text: string): boolean {
+  return Object.prototype.hasOwnProperty.call(LOGIC_ES, text);
 }
