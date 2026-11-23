@@ -1,9 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { correlate, parsePyJson, type AlertEvent, type Runbook } from "@/lib";
 import { LANGS, STRINGS, fmt, type Lang, type StringKey, type Strings } from "@/lib/i18n";
 import { DEFAULT_SPEED, replayDelay, replayOrder, type ReplaySpeed } from "@/lib/replay";
+import { TOUR_QUESTION, TOUR_REPLAY_SPEED, TOUR_STEPS, tourStep } from "@/lib/tour";
+import GuidedTour from "./GuidedTour";
 import IncidentPanel from "./screens/IncidentPanel";
 import LiveReplay from "./screens/LiveReplay";
 import IncidentDetail from "./screens/IncidentDetail";
@@ -64,6 +66,11 @@ export default function NocApp({ data }: { data: DemoData }) {
   const [importStatus, setImportStatus] = useState<ImportStatus | null>(null);
   const [chat, setChat] = useState<ChatTurn[]>([]);
   const [askDraft, setAskDraft] = useState("");
+  // Guided tour: the current step (0-4), or null when the tour is closed.
+  const [tour, setTour] = useState<number | null>(null);
+  // A question the questions screen asks on its own (the tour's last step).
+  const [autoAsk, setAutoAsk] = useState<{ key: StringKey; nonce: number } | null>(null);
+  const tourAsked = useRef(false);
 
   // Language: remembered per browser; storage can be blocked, English stays the default.
   useEffect(() => {
@@ -89,6 +96,8 @@ export default function NocApp({ data }: { data: DemoData }) {
     const read = () => {
       const hash = window.location.hash.replace(/^#/, "");
       if (isScreen(hash)) setScreen(hash);
+      // /#tour opens the app with the guided tour running (a link for the demo).
+      else if (hash === "tour") startTourRef.current();
     };
     read();
     window.addEventListener("hashchange", read);
@@ -130,6 +139,38 @@ export default function NocApp({ data }: { data: DemoData }) {
     setSpeed: (speed: ReplaySpeed) => setReplay((r) => ({ ...r, speed })),
   };
 
+  // Guided tour: replay -> incident -> remediation -> closure -> question.
+  const startTour = () => {
+    tourAsked.current = false;
+    setAutoAsk(null);
+    setTour(0);
+    setEvents([]);
+    setSelectedId(null);
+    setReplay({ status: "playing", index: 0, speed: TOUR_REPLAY_SPEED });
+    go(TOUR_STEPS[0].screen);
+  };
+  const startTourRef = useRef(startTour);
+  startTourRef.current = startTour;
+
+  const showTourStep = (index: number) => {
+    const next = tourStep(index);
+    if (next >= 1) {
+      // Later steps need the whole incident: finish the replay at once.
+      const unfinished = replay.status === "playing" || replay.status === "paused";
+      if (unfinished || events.length === 0) {
+        setEvents(demoEvents);
+        setReplay((r) => ({ ...r, status: "done", index: demoEvents.length }));
+      }
+      if (next === 1) setSelectedId(null); // the main incident (earliest) is shown first
+    }
+    if (next === TOUR_STEPS.length - 1 && !tourAsked.current) {
+      tourAsked.current = true;
+      setAutoAsk({ key: TOUR_QUESTION, nonce: Date.now() });
+    }
+    setTour(next);
+    go(TOUR_STEPS[next].screen);
+  };
+
   const incidents = useMemo(() => correlate(events), [events]);
   const selected = incidents.find((i) => i.id === selectedId) ?? incidents[0] ?? null;
 
@@ -159,7 +200,7 @@ export default function NocApp({ data }: { data: DemoData }) {
   const replaying = replay.status === "playing" || replay.status === "paused";
 
   return (
-    <div className="shell">
+    <div className={tour === null ? "shell" : "shell touring"}>
       <header className="top">
         <div className="brand">
           <span className="logo" aria-hidden="true" />
@@ -170,12 +211,17 @@ export default function NocApp({ data }: { data: DemoData }) {
             <p className="tagline">{t.tagline}</p>
           </div>
         </div>
-        <div className="lang" role="group" aria-label={t.language}>
-          {LANGS.map((l) => (
-            <button key={l} type="button" aria-pressed={lang === l} onClick={() => setLang(l)}>
-              {l.toUpperCase()}
-            </button>
-          ))}
+        <div className="top-actions">
+          <button type="button" className="btn" onClick={startTour} data-testid="tour-start">
+            {t.tourStart}
+          </button>
+          <div className="lang" role="group" aria-label={t.language}>
+            {LANGS.map((l) => (
+              <button key={l} type="button" aria-pressed={lang === l} onClick={() => setLang(l)}>
+                {l.toUpperCase()}
+              </button>
+            ))}
+          </div>
         </div>
       </header>
 
@@ -275,11 +321,23 @@ export default function NocApp({ data }: { data: DemoData }) {
             setChat={(update) => setChat(update)}
             draft={askDraft}
             setDraft={setAskDraft}
+            autoQuestion={autoAsk}
+            onAutoAsked={() => setAutoAsk(null)}
           />
         )}
       </main>
 
       <footer className="foot">{t.footer}</footer>
+
+      {tour !== null && (
+        <GuidedTour
+          t={t}
+          step={tour}
+          onNext={() => showTourStep(tour + 1)}
+          onBack={() => showTourStep(tour - 1)}
+          onExit={() => setTour(null)}
+        />
+      )}
     </div>
   );
 }

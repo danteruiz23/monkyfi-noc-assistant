@@ -58,9 +58,22 @@ interface Props extends ScreenProps {
   setChat: (update: (turns: ChatTurn[]) => ChatTurn[]) => void;
   draft: string;
   setDraft: (text: string) => void;
+  /** A demo question to ask on its own once (the guided tour's last step). */
+  autoQuestion?: { key: StringKey; nonce: number } | null;
+  onAutoAsked?: () => void;
 }
 
-export default function AskQuestions({ t, lang, data, chat, setChat, draft, setDraft }: Props) {
+export default function AskQuestions({
+  t,
+  lang,
+  data,
+  chat,
+  setChat,
+  draft,
+  setDraft,
+  autoQuestion = null,
+  onAutoAsked,
+}: Props) {
   const [busy, setBusy] = useState(false);
   const [readAloud, setReadAloud] = useState(false);
   const [provider, setProvider] = useState<"browser" | "elevenlabs">("browser");
@@ -167,6 +180,26 @@ export default function AskQuestions({ t, lang, data, chat, setChat, draft, setD
     },
     [busy, lang, data, t, setChat, setDraft, readAloud, speak],
   );
+
+  // Bring each new answer into view (CSS scroll-margin keeps it above the tour panel).
+  const chatList = useRef<HTMLOListElement>(null);
+  const shownTurns = useRef(chat.length);
+  useEffect(() => {
+    if (chat.length > shownTurns.current) {
+      const turns = chatList.current?.querySelectorAll<HTMLElement>(".turn");
+      turns?.[turns.length - 1]?.scrollIntoView({ block: "nearest" });
+    }
+    shownTurns.current = chat.length;
+  }, [chat.length]);
+
+  // The tour asks one demo question for the presenter, once per request.
+  const autoNonce = useRef<number | null>(null);
+  useEffect(() => {
+    if (!autoQuestion || autoNonce.current === autoQuestion.nonce) return;
+    autoNonce.current = autoQuestion.nonce;
+    onAutoAsked?.();
+    void ask(t[autoQuestion.key]);
+  }, [autoQuestion, onAutoAsked, ask, t]);
 
   const startDictation = () => {
     const Ctor = recognitionCtor();
@@ -337,7 +370,7 @@ export default function AskQuestions({ t, lang, data, chat, setChat, draft, setD
         {chat.length === 0 ? (
           <p className="muted">{t.askEmpty}</p>
         ) : (
-          <ol className="turns">
+          <ol className="turns" ref={chatList}>
             {chat.map((turn) => (
               <li key={turn.id} className="turn" data-mode={turn.mode} data-testid="ask-turn">
                 <div className="bubble you">
